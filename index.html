@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Weather Platform</title>
+
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <div id="controls-panel">
+
+        <div class="control-group">
+
+            <label>Variable</label>
+
+            <select id="variableSelect">
+                <option value="rain">Rain</option>
+                <option value="temperature">Temperature</option>
+                <option value="humidity">Humidity</option>
+            </select>
+
+        </div>
+
+        <div class="control-group">
+
+            <label>Basemap</label>
+
+            <select id="basemapSelect">
+                <option value="osm">OSM</option>
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="terrain">Terrain</option>
+            </select>
+
+        </div>
+
+        <div class="control-group">
+
+            <label>Frame</label>
+
+            <input id="frameSlider" type="range" min="1" max="48" value="1" />
+
+            <span id="frameLabel">
+                Frame 1
+            </span>
+
+        </div>
+
+        <div class="control-group">
+
+            <button id="playBtn">
+                Play
+            </button>
+
+            <button id="stopBtn">
+                Stop
+            </button>
+
+        </div>
+
+        <div class="control-group">
+
+            <label>
+
+                <input id="toggleContours" type="checkbox" checked />
+
+                Contours
+
+            </label>
+
+        </div>
+
+        <div class="control-group">
+
+            <label>Opacity</label>
+
+            <input id="opacitySlider" type="range" min="0" max="1" step="0.05" value="1" />
+
+        </div>
+
+        <div class="control-group">
+
+            <button id="computeRMSE">
+                Compute RMSE
+            </button>
+
+        </div>
+
+    </div>
+
+    <script type="module" src="/src/app.js">
+    </script>
+
+    </body>
+
+</html>

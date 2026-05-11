@@ -1,0 +1,8 @@
+#RESPONSIBILITY SPLIT
+System ------	Responsibility
+rendering/map	WebGL + map rendering
+ui/controls 	DOM controls
+data -------	loading/caching
+analytics --	metrics
+core/state -	app state
+core/events 	reactive updates
