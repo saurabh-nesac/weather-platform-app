@@ -11,25 +11,61 @@ import { loadFrame }
 import { loadContours }
     from '@/data/loaders/contourLoader.js';
 
+import { VARIABLES }
+    from '@/variables/index.js';
+
 let mapRef = null;
 
 export function initializeRenderController(map) {
 
     mapRef = map;
+    on('frameChanged', async (payload) => {
 
-    on('frameChanged', async (frame) => {
+        const {
+            frame,
+            timestamp
+        } = payload;
 
-        console.log('Rendering frame:', frame);
+        console.log(
+            'Rendering frame:',
+            frame,
+            timestamp
+        );
 
-        const data = await loadFrame(frame);
+        const variable =
+            VARIABLES[
+            store.app.currentVariable
+            ];
 
-        store.frames[frame] = data;
+        const data =
+            await loadFrame(
+                frame,
+                variable
+            );
 
-        await loadContours(mapRef, frame);
+        // initialize variable cache
+        if (
+            !store.cache.frames[
+            variable.id
+            ]
+        ) {
+
+            store.cache.frames[
+                variable.id
+            ] = {};
+        }
+
+        store.cache.frames[
+            variable.id
+        ][frame] = data;
+
+        await loadContours(
+            mapRef,
+            frame
+        );
 
         mapRef.triggerRepaint();
     });
-
     on('variableChanged', async (variable) => {
 
         console.log('Variable changed:', variable);
@@ -44,5 +80,15 @@ export function initializeRenderController(map) {
         store.opacity = opacity;
 
         mapRef.triggerRepaint();
+    });
+
+    on('playbackStarted', () => {
+
+        console.log('▶ Playback Started');
+    });
+
+    on('playbackStopped', () => {
+
+        console.log('■ Playback Stopped');
     });
 }

@@ -17,7 +17,7 @@ import { renderRaster } from '../engine/renderRaster';
 export function createRasterLayer(variable) {
     console.log('createRasterLayer variable:', variable)
     return {
-        id: 'variable',
+        id: 'variable.id',
         type: 'custom',
         renderingMode: '2d',
 
@@ -26,7 +26,7 @@ export function createRasterLayer(variable) {
                 getOrCreateProgram({
 
                     gl,
-                    key: 'variable',
+                    key: 'variable.shader',
                     vertexSource: vs,
                     fragmentSource: fs,
 
@@ -35,7 +35,7 @@ export function createRasterLayer(variable) {
             this.a_pos = gl.getAttribLocation(program, "a_pos");
             this.program = program;
 
-            this.texWRF = gl.createTexture();
+            this.texture = gl.createTexture();
             // this.texGPM = gl.createTexture();
 
             this.u_matrix = gl.getUniformLocation(program, "u_matrix");
@@ -89,12 +89,20 @@ export function createRasterLayer(variable) {
 
             if (!store.app.loaded) return;
             const frame = store.app.currentFrame;
-            const wrf = store.cache.frames[frame];
+            const raster =
+
+                store.cache.frames?.[
+                variable.id
+                ]?.[
+                frame
+                ];
+
+            if (!raster) return;
             // const gpm = framesRight[frame];
 
-            // if (!wrf || !gpm) return;
+            // if (!raster || !gpm) return;
 
-            let wrfData = wrf;
+            let rasterData = raster;
             const width =
                 store.metadata.WIDTH_WRF;
 
@@ -103,9 +111,9 @@ export function createRasterLayer(variable) {
 
             if (variable.processing.blur.enabled) {
 
-                wrfData =
+                rasterData =
                     gaussianBlur2D(
-                        wrfData,
+                        rasterData,
                         width,
                         height,
                         variable.processing.blur.radius
@@ -113,15 +121,15 @@ export function createRasterLayer(variable) {
             }
 
             // if (store.processing.blur.mode === "gaussian") {
-            //     wrfData = gaussianBlur2D(wrfData, width, height, variable.processing.blur.radius);
+            //     rasterData = gaussianBlur2D(rasterData, width, height, variable.processing.blur.radius);
             // }
 
             // if (store.processing.neighborhoodMax.enabled) {
-            //     wrfData = neighborhoodMax3x3(wrfData, width, height);
+            //     rasterData = neighborhoodMax3x3(rasterData, width, height);
             // }
 
             // if (store.processing.maxFilter.enabled) {
-            //     wrfData = maxFilter2D(wrfData, width, height, 1);
+            //     rasterData = maxFilter2D(rasterData, width, height, 1);
 
             // }
 
@@ -134,19 +142,19 @@ export function createRasterLayer(variable) {
                 this.cacheNeigh !== store.processing.neighborhoodMax.enabled
             ) {
 
-                this.texWRFData =
-                    toRGBA(wrfData, width, height, variable);
+                this.textureData =
+                    toRGBA(rasterData, width, height, variable);
 
                 uploadTexture({
                     gl,
                     texture:
-                        this.texWRF,
+                        this.texture,
                     width:
                         width,
                     height:
                         height,
                     data:
-                        this.texWRFData
+                        this.textureData
                 });
 
 
@@ -161,8 +169,8 @@ export function createRasterLayer(variable) {
 
 
             uploadTexture({
-                gl, texture: this.texWRF, width: width,
-                height: height, data: this.texWRFData
+                gl, texture: this.texture, width: width,
+                height: height, data: this.textureData
             });
 
             renderRaster({

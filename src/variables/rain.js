@@ -22,5 +22,8 @@ export default {
             radius: 1
         }
     },
-    colormap: 'rain'
+    colormap: 'rain',
+    time:{
+        
+    }
 };

@@ -1,10 +1,14 @@
+//src\data\loaders\metaLoader.js
 import { store }
     from '@/core/state/store.js';
 
+import { formatTimestamp } from '../../utils/formatTimestamp';
 export async function loadMeta() {
 
     const res =
-        await fetch('/data/bin/meta.json');
+        await fetch(
+            '/data/bin/meta.json'
+        );
 
     const META =
         await res.json();
@@ -21,14 +25,39 @@ export async function loadMeta() {
     store.metadata.lon =
         META.lon;
 
-    console.log(
-        'META:',
-        store.metadata.WIDTH_WRF,
-        store.metadata.HEIGHT_WRF
+    // initialize metadata cache
+    if (
+        !store.cache.metadata.rain
+    ) {
+
+        store.cache.metadata.rain = {};
+    }
+
+    META.timestamps.forEach(
+        (timestamp, index) => {
+
+            store.cache.metadata.rain[
+                index + 1
+            ] = {
+
+                rawTimestamp:
+                    timestamp,
+
+                timestamp:
+                    formatTimestamp(timestamp)
+            };
+        }
     );
+
     console.log(
-        typeof META.nx,
-        typeof META.ny
+        'META timestamps:',
+        store.cache.metadata.rain
     );
+
+    console.log(
+        META.nx,
+        META.ny
+    );
+
     return META;
 }

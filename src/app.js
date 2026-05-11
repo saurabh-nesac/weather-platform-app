@@ -33,7 +33,7 @@ async function boot() {
     await loadMeta();
 
     const frame1 =
-        await loadFrame(7, variable);
+        await loadFrame(store.app.currentFrame, variable);
 
     store.cache.frames[1] = frame1;
     store.app.loaded = true;

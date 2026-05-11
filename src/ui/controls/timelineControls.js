@@ -1,27 +1,39 @@
 import { store }
-from '@/core/state/store.js';
+    from '@/core/state/store.js';
 
+import { emitAsync }
+    from '@/core/events/bus.js';
 
-export function setupTimelineControls(map) {
+export function setupTimelineControls() {
 
     const slider =
-        document.getElementById('frameSlider');
-
-    const label =
-        document.getElementById('frameLabel');
+        document.getElementById(
+            'frameSlider'
+        );
 
     if (!slider) return;
 
     slider.oninput = async () => {
 
-        const frame = Number(slider.value);
+        const frame =
+            Number(slider.value);
 
-        store.app.currentFrame = frame;
+        store.app.currentFrame =
+            frame;
 
-        label.textContent =
-            `Frame ${frame}`;
+        const timestamp =
+            store.cache.metadata?.[
+                store.app.currentVariable
+            ]?.[
+                frame
+            ]?.timestamp || null;
 
-        map.triggerRepaint();
-        console.log('Frame changed:', frame);
+        await emitAsync(
+            'frameChanged',
+            {
+                frame,
+                timestamp
+            }
+        );
     };
 }

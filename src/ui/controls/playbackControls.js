@@ -1,8 +1,13 @@
+//src\ui\controls\playbackControls.js
 
-import { store }
-from '@/core/state/store.js';
+import {
+    startPlayback,
+    stopPlayback
+}
+    from '@/rendering/playback/playbackController.js';
 
-let timer = null;
+import { on }
+    from '@/core/events/bus.js';
 
 export function setupPlaybackControls() {
 
@@ -15,39 +20,44 @@ export function setupPlaybackControls() {
     if (playBtn) {
 
         playBtn.onclick = () => {
-
-            if (timer) return;
-
-            store.playing = true;
-
-            timer = setInterval(() => {
-
-                store.currentFrame++;
-
-                if (store.currentFrame > 48) {
-                    store.currentFrame = 1;
-                }
-
-                const slider =
-                    document.getElementById('frameSlider');
-
-                if (slider) {
-                    slider.value = store.currentFrame;
-                }
-
-            }, 500);
+            startPlayback();
         };
     }
 
     if (stopBtn) {
 
         stopBtn.onclick = () => {
-
-            clearInterval(timer);
-
-            timer = null;
-
-            store.playing = false;
+            stopPlayback();
         };
     }
+
+    on('frameChanged', payload => {
+
+        const {
+            frame,
+            timestamp
+        } = payload;
+
+        console.log(
+            'Forecast Timestamp:',
+            timestamp
+        );
+
+        const slider =
+            document.getElementById('frameSlider');
+
+        const label =
+            document.getElementById('frameLabel');
+
+        if (slider) {
+            slider.value = frame;
+        }
+
+        if (label) {
+            label.textContent =
+                timestamp
+                    ? `Frame ${frame} • ${timestamp}`
+                    : `Frame ${frame}`;
+        }
+    });
 }

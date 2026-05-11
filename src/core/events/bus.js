@@ -17,3 +17,10 @@ export function emit(event, payload) {
 
     listeners[event].forEach(cb => cb(payload));
 }
+
+export async function emitAsync(event, payload){
+    if(!listeners[event]) return;
+    await Promise.all(
+        listeners[event].map(cb => cb(payload))
+    )
+}

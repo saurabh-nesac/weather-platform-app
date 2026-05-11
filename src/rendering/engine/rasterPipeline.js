@@ -117,6 +117,7 @@ export function createProgram(gl, vs, fs) {
 
 export function gaussianBlur2D(data, width, height, radius = 1) {
 
+
     const kernelSize = radius * 2 + 1;
     const sigma = radius / 2;
 
@@ -166,7 +167,6 @@ export function gaussianBlur2D(data, width, height, radius = 1) {
             output[y * width + x] = acc;
         }
     }
-    console.log(output.length)
     return output;
 }
 
