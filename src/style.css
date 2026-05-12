@@ -5,6 +5,47 @@ html, body, #app {
     height: 100%;
 }
 
+#loadingOverlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    backdrop-filter: blur(4px);
+
+    z-index: 9999;
+
+    pointer-events: none;
+
+    transition: opacity 0.3s ease;
+}
+
+#loadingText {
+
+    color: white;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    letter-spacing: 0.5px;
+}
+
+#loadingOverlay.hidden {
+
+    opacity: 0;
+
+    visibility: hidden;
+}
+
 body {
     background: #000;
     overflow: hidden;

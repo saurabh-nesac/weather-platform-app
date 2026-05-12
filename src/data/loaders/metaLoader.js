@@ -50,11 +50,6 @@ export async function loadMeta() {
     );
 
     console.log(
-        'META timestamps:',
-        store.cache.metadata.rain
-    );
-
-    console.log(
         META.nx,
         META.ny
     );

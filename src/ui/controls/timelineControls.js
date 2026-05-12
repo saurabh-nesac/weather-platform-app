@@ -4,7 +4,7 @@ import { store }
 import { emitAsync }
     from '@/core/events/bus.js';
 
-export function setupTimelineControls() {
+export function setupTimelineControls(map) {
 
     const slider =
         document.getElementById(
