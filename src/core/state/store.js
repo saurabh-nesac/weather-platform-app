@@ -58,5 +58,17 @@ export const store = {
         contours: {},
 
         metadata: {}
+    },
+    progress:{
+        visible:false,
+        progress:0,
+        text:'',
+        stages:{
+            network:0,
+            decode:0,
+            textUpload:0,
+            shaderCompile:0,
+        }
     }
+
 };
