@@ -1,3 +1,6 @@
+atmospheric-engine/app/__pycache__/main.cpython-312.pyc
+__pycache__/
+*.pyc
 # Logs
 logs
 *.log
@@ -7,9 +10,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+frontend/node_modules
+frontend/dist
+frontend/dist-ssr
 *.local
 
 # Editor directories and files
@@ -24,5 +27,5 @@ dist-ssr
 *.sw?
 
 
-public/data/bin/*
-public/data/contours/*
+frontend/public/data/bin/*
+frontend/public/data/contours/*
