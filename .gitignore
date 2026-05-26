@@ -10,3 +10,4 @@ __pycache__/
 .vite/
 .vscode/
 frontend/public/data/
+venv
