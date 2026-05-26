@@ -1,5 +1,5 @@
 import { contourCache }
-from '../cache/contourCache.js';
+    from '../cache/contourCache.js';
 
 export async function loadContours(map, frame) {
 
@@ -62,16 +62,19 @@ function updateContourSource(map, data) {
                 'interpolate',
                 ['linear'],
                 ['get', 'value'],
-
-                1, '#00e5ff',
+                0, '#ffffff',
+                0.1, '#b0e0e6',
+                1, '#09185c',
                 5, '#00ff00',
                 10, '#ffff00',
                 20, '#ff9900',
-                50, '#ff0000',
+                30, '#ff0000',
+                50, '#800080',
                 100, '#ff00ff'
-            ],
+            ]
+            ,
 
-            'line-width': 2,
+            'line-width': 10,
 
             'line-opacity': 0.9
         }

@@ -1,3 +1,4 @@
+//C:\Users\NESAC\weather-platform\src\app.js
 import './style.css';
 import { createMap } from '@/rendering/map/map.js';
 import { addTerrain } from '@/rendering/map/terrain.js';
