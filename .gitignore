@@ -29,3 +29,13 @@ frontend/dist-ssr
 
 frontend/public/data/bin/*
 frontend/public/data/contours/*
+
+__pycache__/
+*.pyc
+node_modules/
+metpy-validation/
+datasets/
+atmospheric-engine/datasets/
+*.zarr/
+*.nc
+.vite/
