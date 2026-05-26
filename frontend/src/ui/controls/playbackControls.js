@@ -4,7 +4,7 @@ import {
     startPlayback,
     stopPlayback
 }
-    from '@/rendering/playback/playbackController.js';
+    from '@/rendering/playback/playBackController.js';
 
 import { on }
     from '@/core/events/bus.js';
