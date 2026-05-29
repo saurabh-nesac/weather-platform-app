@@ -1,3 +1,4 @@
+//frontend/src/core/events/frameEvents.js
 import { emit, emitAsync } from "./bus";
 import { store } from "../state/store";
 

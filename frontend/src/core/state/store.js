@@ -15,7 +15,7 @@ export const store = {
 
     rendering: {
 
-        opacity: 1.0
+        opacity: 0.1
     },
 
     processing: {

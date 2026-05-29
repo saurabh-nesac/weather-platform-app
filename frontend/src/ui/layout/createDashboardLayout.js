@@ -1,48 +1,51 @@
-function createPanel({
+function createPanel(title) {
 
-    id,
+    const panel = document.createElement('div');
 
-    title
-}) {
+    panel.className = `
+        flex
+        flex-col
+        rounded-2xl
+        border
+        border-slate-800
+        bg-slate-950/90
+        shadow-2xl
+        overflow-hidden
+        backdrop-blur-sm
+    `;
 
-    const panel =
-        document.createElement('div');
+    const header = document.createElement('div');
 
-    panel.id = id;
+    header.className = `
+        h-11
+        px-4
+        flex
+        items-center
+        text-sm
+        font-semibold
+        tracking-wide
+        border-b
+        border-slate-800
+        bg-slate-900/80
+        text-slate-100
+    `;
 
-    panel.className =
-        'dashboard-panel';
+    header.innerText = title;
 
-    const header =
-        document.createElement('div');
+    const body = document.createElement('div');
 
-    header.className =
-        'panel-header';
+    body.className = `
+        flex-1
+        min-h-0
+        relative
+        overflow-hidden
+    `;
 
-    header.innerText =
-        title;
-
-    panel.appendChild(
-        header
-    );
-
-    const body =
-        document.createElement('div');
-
-    body.className =
-        'panel-body';
-
-    body.id =
-        `${id}-body`;
-
-    panel.appendChild(
-        body
-    );
+    panel.appendChild(header);
+    panel.appendChild(body);
 
     return {
-
         panel,
-
         body
     };
 }
@@ -50,150 +53,108 @@ function createPanel({
 
 export function createDashboardLayout() {
 
-    const dashboard =
-        document.createElement('div');
+    const dashboard = document.createElement('div');
 
-    dashboard.id =
-        'dashboard';
+    dashboard.className = `
+        h-screen
+        w-screen
+        grid
+        gap-3
+        p-3
+        bg-slate-950
+        text-white
+        overflow-hidden
+        grid-cols-[260px_minmax(0,1fr)_380px]
+        grid-rows-[minmax(0,1fr)_380px]
+    `;
 
-    document.body.appendChild(
-        dashboard
-    );
-
-    // =====================================================
-    // MAP
-    // =====================================================
-
-    const mapPanel =
-        document.createElement('div');
-
-    mapPanel.id =
-        'map-panel';
-
-    dashboard.appendChild(
-        mapPanel
-    );
+    document
+        .getElementById('app')
+        .appendChild(dashboard);
 
     // =====================================================
-    // RIGHT PANEL
+    // LEFT CONTROL SIDEBAR
     // =====================================================
 
-    const rightPanel =
-        document.createElement('div');
+    const sidebar = document.createElement('div');
 
-    rightPanel.id =
-        'right-panel';
+    sidebar.className = `
+        row-span-2
+        rounded-2xl
+        border
+        border-slate-800
+        bg-slate-950/95
+        shadow-2xl
+        overflow-y-auto
+        flex
+        flex-col
+    `;
 
-    dashboard.appendChild(
-        rightPanel
-    );
-
-    // =====================================================
-    // SUMMARY
-    // =====================================================
-
-    const summary =
-        createPanel({
-
-            id:
-                'summary-panel',
-
-            title:
-                'Forecast Summary'
-        });
-
-    rightPanel.appendChild(
-        summary.panel
-    );
+    dashboard.appendChild(sidebar);
 
     // =====================================================
-    // DIAGNOSTICS
+    // MAP PANEL
     // =====================================================
 
-    const gauges =
-        createPanel({
+    const mapPanel = createPanel('NE India Atmospheric View');
 
-            id:
-                'gauge-panel',
-
-            title:
-                'Diagnostics'
-        });
-
-    rightPanel.appendChild(
-        gauges.panel
-    );
+    dashboard.appendChild(mapPanel.panel);
 
     // =====================================================
-    // SKEWT
+    // RIGHT COLUMN
     // =====================================================
 
-    const skewt =
-        createPanel({
+    const rightColumn = document.createElement('div');
 
-            id:
-                'skewt-panel',
+    rightColumn.className = `
+        row-span-2
+        grid
+        gap-3
+        min-h-0
+        grid-rows-[110px_140px_minmax(0,1fr)]
+    `;
 
-            title:
-                'Skew-T / Thermodynamics'
-        });
+    dashboard.appendChild(rightColumn);
 
-    rightPanel.appendChild(
-        skewt.panel
-    );
+    // Summary
+    const summaryPanel = createPanel('Forecast Summary');
+    rightColumn.appendChild(summaryPanel.panel);
 
-    // =====================================================
-    // BOTTOM PANEL
-    // =====================================================
+    // Diagnostics
+    const diagnosticsPanel = createPanel('Diagnostics');
+    rightColumn.appendChild(diagnosticsPanel.panel);
 
-    const bottomPanel =
-        document.createElement('div');
-
-    bottomPanel.id =
-        'bottom-panel';
-
-    dashboard.appendChild(
-        bottomPanel
-    );
+    // SkewT
+    const skewtPanel = createPanel('Skew-T / Thermodynamics');
+    rightColumn.appendChild(skewtPanel.panel);
 
     // =====================================================
-    // METEOGRAM
+    // BOTTOM METEOGRAM
     // =====================================================
 
-    const meteogram =
-        createPanel({
+    const meteogramPanel = createPanel('Meteogram');
 
-            id:
-                'meteogram-panel',
-
-            title:
-                'Meteogram'
-        });
-
-    bottomPanel.appendChild(
-        meteogram.panel
-    );
+    dashboard.appendChild(meteogramPanel.panel);
 
     return {
 
         dashboard,
 
-        mapPanel,
+        sidebar,
 
-        rightPanel,
-
-        bottomPanel,
+        mapPanel:
+            mapPanel.body,
 
         summaryPanel:
-            summary.body,
+            summaryPanel.body,
 
-        gaugePanel:
-            gauges.body,
-
-        meteogramPanel:
-            meteogram.body,
+        diagnosticsPanel:
+            diagnosticsPanel.body,
 
         skewtPanel:
-            skewt.body
+            skewtPanel.body,
+
+        meteogramPanel:
+            meteogramPanel.body
     };
 }

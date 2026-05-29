@@ -1,63 +1,80 @@
-//src\ui\controls\playbackControls.js
-
 import {
+
     startPlayback,
     stopPlayback
-}
-    from '@/rendering/playback/playBackController.js';
 
-import { on }
-    from '@/core/events/bus.js';
+} from '@/rendering/playback/playBackController.js';
 
-export function setupPlaybackControls() {
+
+// ============================================================
+// PLAYBACK CONTROLS
+// ============================================================
+
+export function setupPlaybackControls(
+    container
+) {
+
+    const wrapper =
+        document.createElement('div');
+
+    wrapper.className = `
+        grid
+        grid-cols-2
+        gap-2
+    `;
+
+    // --------------------------------------------------------
+    // PLAY
+    // --------------------------------------------------------
 
     const playBtn =
-        document.getElementById('playBtn');
+        document.createElement('button');
+
+    playBtn.className = `
+        rounded-xl
+        bg-cyan-500
+        hover:bg-cyan-400
+        text-black
+        font-semibold
+        py-2
+        transition
+    `;
+
+    playBtn.innerText =
+        'Play';
+
+    playBtn.onclick = () => {
+
+        startPlayback();
+    };
+
+    // --------------------------------------------------------
+    // STOP
+    // --------------------------------------------------------
 
     const stopBtn =
-        document.getElementById('stopBtn');
+        document.createElement('button');
 
-    if (playBtn) {
+    stopBtn.className = `
+        rounded-xl
+        bg-slate-800
+        hover:bg-slate-700
+        text-white
+        py-2
+        transition
+    `;
 
-        playBtn.onclick = () => {
-            startPlayback();
-        };
-    }
+    stopBtn.innerText =
+        'Stop';
 
-    if (stopBtn) {
+    stopBtn.onclick = () => {
 
-        stopBtn.onclick = () => {
-            stopPlayback();
-        };
-    }
+        stopPlayback();
+    };
 
-    on('frameChanged', payload => {
+    wrapper.appendChild(playBtn);
 
-        const {
-            frame,
-            timestamp
-        } = payload;
+    wrapper.appendChild(stopBtn);
 
-        console.log(
-            'Forecast Timestamp:',
-            timestamp
-        );
-
-        const slider =
-            document.getElementById('frameSlider');
-
-        const label =
-            document.getElementById('frameLabel');
-
-        if (slider) {
-            slider.value = frame;
-        }
-
-        if (label) {
-            label.textContent =
-                timestamp
-                    ? `Frame ${frame} • ${timestamp}`
-                    : `Frame ${frame}`;
-        }
-    });
+    container.appendChild(wrapper);
 }

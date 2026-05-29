@@ -1,18 +1,16 @@
 const listeners = [];
 
-export function subscribeTimeline(
-    callback
-) {
+export async function subscribeTimeline(callback) {
 
-    listeners.push(callback);
+    await listeners.push(callback);
+    console.log(listeners)
 }
 
-export function emitTimelineUpdate(
-    state
-) {
+export function emitTimelineUpdate(state) {
 
     for (const callback of listeners) {
 
         callback(state);
     }
+    console.log(listeners)
 }

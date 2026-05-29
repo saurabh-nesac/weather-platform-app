@@ -1,3 +1,4 @@
+//frontend/src/ui/controls/analyticsControls.js
 export function setupAnalyticsControls() {
 
     const btn =

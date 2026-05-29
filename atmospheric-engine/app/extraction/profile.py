@@ -8,7 +8,7 @@ from app.indexing.query_kdtree import (
 
 
 BASE_PATH = Path(
-    "/home/saurabh/projects/weather-platform"
+    "/home/saurabh/projects/weather-platform/atmospheric-engine"
 )
 
 ZARR_PATH = (

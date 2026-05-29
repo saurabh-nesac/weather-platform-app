@@ -1,21 +1,105 @@
 import { store }
-from '@/core/state/store.js';
+    from '@/core/state/store.js';
 
-export function setupVariableControls() {
+import { VARIABLES }
+    from '@/variables/index.js';
+
+
+// ============================================================
+// VARIABLE CONTROLS
+// ============================================================
+
+export function setupVariableControls(
+    container
+) {
+
+    const wrapper =
+        document.createElement('div');
+
+    wrapper.className =
+        'space-y-2';
+
+    // --------------------------------------------------------
+    // LABEL
+    // --------------------------------------------------------
+
+    const label =
+        document.createElement('div');
+
+    label.className = `
+        text-sm
+        text-slate-300
+    `;
+
+    label.innerText =
+        'Variable';
+
+    // --------------------------------------------------------
+    // SELECT
+    // --------------------------------------------------------
 
     const select =
-        document.getElementById('variableSelect');
+        document.createElement('select');
 
-    if (!select) return;
+    select.className = `
+        w-full
+        rounded-xl
+        bg-slate-900
+        border
+        border-slate-700
+        px-3
+        py-2
+        text-sm
+        text-white
+        outline-none
+    `;
+
+    // --------------------------------------------------------
+    // OPTIONS
+    // --------------------------------------------------------
+
+    Object.values(VARIABLES)
+        .forEach(variable => {
+
+            const option =
+                document.createElement('option');
+
+            option.value =
+                variable.id;
+
+            option.innerText =
+                variable.label;
+
+            select.appendChild(
+                option
+            );
+        });
+
+    // --------------------------------------------------------
+    // VALUE
+    // --------------------------------------------------------
+
+    select.value =
+        store.app.currentVariable;
+
+    // --------------------------------------------------------
+    // EVENT
+    // --------------------------------------------------------
 
     select.onchange = () => {
 
-        store.currentVariable =
+        store.app.currentVariable =
             select.value;
 
         console.log(
             'Variable:',
-            store.currentVariable
+            select.value
         );
     };
+
+    wrapper.appendChild(label);
+
+    wrapper.appendChild(select);
+
+    container.appendChild(wrapper);
 }

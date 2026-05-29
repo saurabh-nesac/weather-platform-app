@@ -1,4 +1,30 @@
-render(gl, args) {
+// frontend/src/rendering/layers/rasterLayer.js
+
+import {
+
+    renderRaster
+
+} from '@/rendering/engine/renderRaster.js';
+
+import {
+
+    store
+
+} from '@/core/state/store.js';
+
+
+// ============================================================
+// RENDER LAYER
+// ============================================================
+
+export function renderLayer(
+
+    gl,
+
+    args,
+
+    layer
+) {
 
     renderRaster({
 
@@ -8,15 +34,15 @@ render(gl, args) {
             args.defaultProjectionData.mainMatrix,
 
         texture:
-            this.texture,
+            layer.texture,
 
         shader:
-            this.shader,
+            layer.shader,
 
         scaling:
-            this.scaling,
+            layer.scaling,
 
         opacity:
-            store.opacity
+            store.rendering.opacity
     });
 }

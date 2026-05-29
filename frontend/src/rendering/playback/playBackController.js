@@ -1,24 +1,49 @@
-//src\rendering\playback\playBackControllers.js
-
-import { store }
-from '@/core/state/store.js';
+// src/rendering/playback/playBackControllers.js
 
 import {
-    emit,
-    emitAsync
-}
-from '@/core/events/bus.js';
+
+    store
+
+} from '@/core/state/store.js';
+
+import {
+
+    emit
+
+} from '@/core/events/bus.js';
+
+import {
+
+    setFrame
+
+} from '@/core/timeline/setFrame.js';
+
+
+// ============================================================
+// INTERNAL
+// ============================================================
 
 let running = false;
 
 let playbackTask = null;
 
+
+// ============================================================
+// SLEEP
+// ============================================================
+
 function sleep(ms) {
 
     return new Promise(resolve => {
+
         setTimeout(resolve, ms);
     });
 }
+
+
+// ============================================================
+// START PLAYBACK
+// ============================================================
 
 export async function startPlayback() {
 
@@ -28,23 +53,33 @@ export async function startPlayback() {
 
     store.app.playing = true;
 
-    const currentFrame =
-        store.app.currentFrame;
+    // --------------------------------------------------------
+    // EVENT
+    // --------------------------------------------------------
 
-    const timestamp =
-        store.cache.metadata?.[
-            store.app.currentVariable
-        ]?.[
-            currentFrame
-        ]?.timestamp || null;
+    emit(
 
-    emit('playbackStarted', {
-        frame: currentFrame,
-        timestamp
-    });
+        'playbackStarted',
 
-    playbackTask = playLoop();
+        {
+
+            frame:
+                store.app.currentFrame
+        }
+    );
+
+    // --------------------------------------------------------
+    // LOOP
+    // --------------------------------------------------------
+
+    playbackTask =
+        playLoop();
 }
+
+
+// ============================================================
+// STOP PLAYBACK
+// ============================================================
 
 export function stopPlayback() {
 
@@ -52,49 +87,54 @@ export function stopPlayback() {
 
     store.app.playing = false;
 
-    const currentFrame =
-        store.app.currentFrame;
+    emit(
 
-    const timestamp =
-        store.cache.metadata?.[
-            store.app.currentVariable
-        ]?.[
-            currentFrame
-        ]?.timestamp || null;
+        'playbackStopped',
 
-    emit('playbackStopped', {
-        frame: currentFrame,
-        timestamp
-    });
+        {
+
+            frame:
+                store.app.currentFrame
+        }
+    );
 }
+
+
+// ============================================================
+// PLAY LOOP
+// ============================================================
 
 async function playLoop() {
 
     while (running) {
 
-        store.app.currentFrame++;
+        // ----------------------------------------------------
+        // NEXT FRAME
+        // ----------------------------------------------------
 
-        if (store.app.currentFrame > 72) {
-            store.app.currentFrame = 1;
+        let nextFrame =
+            store.app.currentFrame + 1;
+
+        // ----------------------------------------------------
+        // LOOP
+        // ----------------------------------------------------
+
+        if (nextFrame > 48) {
+
+            nextFrame = 0;
         }
 
-        const frame =
-            store.app.currentFrame;
+        // ----------------------------------------------------
+        // CENTRALIZED FRAME UPDATE
+        // ----------------------------------------------------
 
-        const timestamp =
-            store.cache.metadata?.[
-                store.app.currentVariable
-            ]?.[
-                frame
-            ]?.timestamp || null;
-
-        await emitAsync(
-            'frameChanged',
-            {
-                frame,
-                timestamp
-            }
+        await setFrame(
+            nextFrame
         );
+
+        // ----------------------------------------------------
+        // SPEED
+        // ----------------------------------------------------
 
         await sleep(500);
     }

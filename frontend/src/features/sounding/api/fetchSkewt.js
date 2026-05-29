@@ -1,7 +1,3 @@
-import { API_BASE }
-    from '@/core/config/api.js';
-
-
 export async function fetchSkewt(
 
     lat,
@@ -11,7 +7,7 @@ export async function fetchSkewt(
 
     const response = await fetch(
 
-        `${API_BASE}/skewt` +
+        `http://localhost:8000/api/skewt` +
 
         `?lat=${lat}` +
 

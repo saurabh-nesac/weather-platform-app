@@ -1,3 +1,4 @@
+//frontend/src/ui/controls/opacityControls.js
 export function setupOpacityControls(map) {
 
     const slider =
