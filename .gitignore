@@ -15,3 +15,4 @@ weather-platform.bundle
 frontend/dist
 backup.bundle
 frontend-react/public/data/temperature/*.bin
+repo.bundle
