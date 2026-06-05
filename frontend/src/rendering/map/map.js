@@ -55,7 +55,7 @@ export function createMap(
                         tiles:
                             BASEMAPS.osm,
 
-                        tileSize: 256
+                        tileSize: 256,
                     }
                 },
 

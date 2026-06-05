@@ -32,25 +32,32 @@ export
             width * height * 4
         );
 
+    const sMin = variable.scaling?.min ?? 0;
+    const sMax = variable.scaling?.max ?? 1;
+    const range = sMax - sMin || 1;
+
     for (let i = 0; i < data.length; i++) {
 
         let d = data[i];
 
-        // 🚫 mask invalid / no rain
-        if (!isFinite(d) || d <= 0) {
+        // mask invalid
+        if (!isFinite(d)) {
             rgba[i * 4 + 3] = 0; // transparent
             continue;
         }
 
-        // normalize
-        let v = d / variable.scaling.max;
+        // For precipitation-like vars (rain) treat zero-or-less as transparent
+        const maskZero = variable.maskZero ?? (variable.id === 'rain');
+        if (maskZero && d <= 0) {
+            rgba[i * 4 + 3] = 0;
+            continue;
+        }
+
+        // normalize using min/max
+        let v = (d - sMin) / range;
         v = Math.min(1, Math.max(0, v));
 
-        const color =
-            applyColormap(
-                v,
-                variable.colormap
-            );
+        const color = applyColormap(v, variable.colormap);
 
         rgba[i * 4 + 0] = color[0];
         rgba[i * 4 + 1] = color[1];

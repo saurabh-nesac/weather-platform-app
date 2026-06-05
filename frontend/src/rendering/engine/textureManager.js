@@ -1,3 +1,4 @@
+//frontend/src/rendering/engine/textureManager.js
 export function uploadTexture({
 
     gl,

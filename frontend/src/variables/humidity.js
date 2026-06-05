@@ -13,6 +13,16 @@ export default {
         max: 100
     },
 
+    processing: {
+
+        blur: {
+
+            enabled: false,
+
+            radius: 1
+        }
+    },
+
     texture: {
 
         transparentBelow: null,

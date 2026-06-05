@@ -5,12 +5,10 @@ export const store = {
     app: {
 
         loaded: false,
-
         currentFrame: 1,
-
         currentVariable: 'rain',
-
         playing: false
+
     },
 
     rendering: {
@@ -23,9 +21,7 @@ export const store = {
         blur: {
 
             enabled: true,
-
             mode: 'gaussian',
-
             radius: 1
         },
 
@@ -43,11 +39,8 @@ export const store = {
     metadata: {
 
         WIDTH_WRF: 0,
-
         HEIGHT_WRF: 0,
-
         lat: [],
-
         lon: []
     },
 

@@ -13,3 +13,5 @@ frontend/public/data/
 venv
 weather-platform.bundle
 frontend/dist
+backup.bundle
+frontend-react/public/data/temperature/*.bin

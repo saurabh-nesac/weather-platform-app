@@ -65,7 +65,7 @@ function updateContourSource(map, data) {
                 ['get', 'value'],
                 0, '#ffffff',
                 0.1, '#b0e0e6',
-                1, '#09185c',
+                1, '#5b6baf',
                 5, '#00ff00',
                 10, '#ffff00',
                 20, '#ff9900',
@@ -75,7 +75,7 @@ function updateContourSource(map, data) {
             ]
             ,
 
-            'line-width': 10,
+            'line-width': 2,
 
             'line-opacity': 0.9
         }

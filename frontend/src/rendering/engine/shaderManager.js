@@ -1,3 +1,4 @@
+//frontend/src/rendering/engine/shaderManager.js
 import { BBOX } from '@/core/config/variables.js';
 import maplibregl from "maplibre-gl";
 

@@ -2,6 +2,8 @@ export default {
 
     id: 'temperature',
 
+    filePrefix: 'temp',
+
     label: 'Temperature',
 
     units: '°C',
@@ -11,6 +13,16 @@ export default {
         min: -10,
 
         max: 45
+    },
+
+    processing: {
+
+        blur: {
+
+            enabled: false,
+
+            radius: 1
+        }
     },
 
     texture: {

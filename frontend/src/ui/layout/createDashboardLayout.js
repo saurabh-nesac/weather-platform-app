@@ -72,9 +72,7 @@ export function createDashboardLayout() {
         .getElementById('app')
         .appendChild(dashboard);
 
-    // =====================================================
     // LEFT CONTROL SIDEBAR
-    // =====================================================
 
     const sidebar = document.createElement('div');
 
@@ -92,17 +90,13 @@ export function createDashboardLayout() {
 
     dashboard.appendChild(sidebar);
 
-    // =====================================================
     // MAP PANEL
-    // =====================================================
 
     const mapPanel = createPanel('NE India Atmospheric View');
 
     dashboard.appendChild(mapPanel.panel);
 
-    // =====================================================
     // RIGHT COLUMN
-    // =====================================================
 
     const rightColumn = document.createElement('div');
 
@@ -128,9 +122,7 @@ export function createDashboardLayout() {
     const skewtPanel = createPanel('Skew-T / Thermodynamics');
     rightColumn.appendChild(skewtPanel.panel);
 
-    // =====================================================
     // BOTTOM METEOGRAM
-    // =====================================================
 
     const meteogramPanel = createPanel('Meteogram');
 

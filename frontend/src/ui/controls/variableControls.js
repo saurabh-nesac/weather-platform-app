@@ -4,6 +4,9 @@ import { store }
 import { VARIABLES }
     from '@/variables/index.js';
 
+import { emitCurrentFrame }
+    from '@/core/events/frameEvents.js';
+
 
 // ============================================================
 // VARIABLE CONTROLS
@@ -86,15 +89,16 @@ export function setupVariableControls(
     // EVENT
     // --------------------------------------------------------
 
-    select.onchange = () => {
+    select.onchange = async () => {
 
-        store.app.currentVariable =
-            select.value;
-
+        store.app.currentVariable = select.value;
+        
         console.log(
             'Variable:',
             select.value
         );
+
+        await emitCurrentFrame();
     };
 
     wrapper.appendChild(label);

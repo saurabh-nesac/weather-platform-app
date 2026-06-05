@@ -2,6 +2,9 @@
 import { store }
     from '@/core/state/store.js';
 
+import { VARIABLES }
+    from '@/variables/index.js';
+
 import { formatTimestamp } from '../../utils/formatTimestamp';
 export async function loadMeta() {
 
@@ -25,29 +28,38 @@ export async function loadMeta() {
     store.metadata.lon =
         META.lon;
 
-    // initialize metadata cache
-    if (
-        !store.cache.metadata.rain
-    ) {
+    Object.values(VARIABLES)
+        .forEach(variable => {
 
-        store.cache.metadata.rain = {};
-    }
+            if (
+                !store.cache.metadata[
+                    variable.id
+                ]
+            ) {
 
-    META.timestamps.forEach(
-        (timestamp, index) => {
+                store.cache.metadata[
+                    variable.id
+                ] = {};
+            }
 
-            store.cache.metadata.rain[
-                index + 1
-            ] = {
+            META.timestamps.forEach(
+                (timestamp, index) => {
 
-                rawTimestamp:
-                    timestamp,
+                    store.cache.metadata[
+                        variable.id
+                    ][
+                        index + 1
+                    ] = {
 
-                timestamp:
-                    formatTimestamp(timestamp)
-            };
-        }
-    );
+                        rawTimestamp:
+                            timestamp,
+
+                        timestamp:
+                            formatTimestamp(timestamp)
+                    };
+                }
+            );
+        });
 
     console.log(
         META.nx,

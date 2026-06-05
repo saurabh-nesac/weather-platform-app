@@ -21,10 +21,13 @@ export const BASEMAPS = {
     ],
 
     terrain: [
-        "https://tile.opentopomap.org/{z}/{x}/{y}.png"
+        "https://api.maptiler.com/maps/hybrid-v4/{z}/{x}/{y}@2x.jpg?key=z7eeVeg8yLVtAQHoalLL"
     ],
 
     satellite: [
-        "https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=YOUR_KEY"
+        "https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=rXxNYojI5TunEnE0Clu1"
+    ],
+    outline: [
+        "https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}@2x.jpg?key=z7eeVeg8yLVtAQHoalLL"
     ]
 };

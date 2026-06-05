@@ -1,7 +1,8 @@
-//src/rendering/map/rainLayer.js
+// frontend/src/rendering/map/createRasterLayer.js
 
 import { BBOX }
     from '@/core/config/variables.js';
+import { VARIABLES } from '@/variables/index.js';
 import { toRGBA, compile } from '../engine/rasterPipeline';
 
 import { store } from '@/core/state/store.js';
@@ -17,7 +18,7 @@ import { renderRaster } from '../engine/renderRaster';
 export function createRasterLayer(variable) {
     console.log('createRasterLayer variable:', variable)
     return {
-        id: 'variable.id',
+        id: 'raster-layer',
         type: 'custom',
         renderingMode: '2d',
 
@@ -42,7 +43,7 @@ export function createRasterLayer(variable) {
             // this.u_split = gl.getUniformLocation(program, "u_split");
             this.u_wrf = gl.getUniformLocation(program, "u_wrf");
             // this.u_gpm = gl.getUniformLocation(program, "u_gpm");
-
+            console.log('BBOX: ',BBOX)
             const [minLon, minLat, maxLon, maxLat] = BBOX;
 
             this.u_min = gl.getUniformLocation(program, "u_min");
@@ -86,15 +87,18 @@ export function createRasterLayer(variable) {
                 args.defaultProjectionData.mainMatrix;
             // console.log(matrix)
 
+            const variable =
+                VARIABLES[
+                    store.app.currentVariable
+                ];
 
             if (!store.app.loaded) return;
             const frame = store.app.currentFrame;
             const raster =
-
                 store.cache.frames?.[
-                variable.id
+                    variable.id
                 ]?.[
-                frame
+                    frame
                 ];
 
             if (!raster) return;
@@ -109,14 +113,20 @@ export function createRasterLayer(variable) {
             const height =
                 store.metadata.HEIGHT_WRF;
 
-            if (variable.processing.blur.enabled) {
+            const blurEnabled =
+                variable.processing?.blur?.enabled ?? false;
+
+            const blurRadius =
+                variable.processing?.blur?.radius ?? 1;
+
+            if (blurEnabled) {
 
                 rasterData =
                     gaussianBlur2D(
                         rasterData,
                         width,
                         height,
-                        variable.processing.blur.radius
+                        blurRadius
                     );
             }
 
@@ -141,6 +151,22 @@ export function createRasterLayer(variable) {
                 this.cacheMax !== store.processing.maxFilter.enabled ||
                 this.cacheNeigh !== store.processing.neighborhoodMax.enabled
             ) {
+                console.log(
+                    rasterData[0],
+                    rasterData[1000],
+                    rasterData[10000]
+                );
+
+                let min = Infinity;
+                let max = -Infinity;
+
+                for (let i = 0; i < rasterData.length; i++) {
+                    min = Math.min(min, rasterData[i]);
+                    max = Math.max(max, rasterData[i]);
+                }
+
+                console.log("MIN", min);
+                console.log("MAX", max);
 
                 this.textureData =
                     toRGBA(rasterData, width, height, variable);

@@ -1,3 +1,4 @@
+//frontend/src/rendering/engine/renderRaster.js
 export function renderRaster({
 
     gl,
