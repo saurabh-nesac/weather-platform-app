@@ -13,6 +13,9 @@ import { Gauge } from "@/components/atmos/Gauge";
 import { Timeline } from "@/components/atmos/Timeline";
 import { Validation } from "@/components/atmos/Validation";
 import type { BasinId } from "@/components/atmos/basins";
+import { TimelineControl } from "../components/controls/TimelineControl";
+import { bootstrapDatasets } from "../core/bootstrap/bootstrapDatasets";
+import { useDatasetStore } from "../core/state/datasetStore";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,6 +39,14 @@ function AtmosphericEngine() {
   const [selectedBasin, setSelectedBasin] = useState<BasinId | null>("beki");
 
   useEffect(() => {
+    bootstrapDatasets();
+  }, []);
+
+  console.log(
+    useDatasetStore.getState()
+  );
+
+  useEffect(() => {
     if (!playing) return;
     const id = setInterval(() => {
       setProgress((p) => (p >= 1 ? 0 : p + 0.002));
@@ -52,9 +63,9 @@ function AtmosphericEngine() {
             <Cloud className="h-4 w-4" />
           </div>
           <div className="font-semibold tracking-tight">Atmospheric Engine</div>
-          <span className="chip !py-0.5 !px-1.5 bg-accent/15 border-accent/40 text-accent">v2.4.1</span>
+          <span className="chip !py-0.5 !px-1.5 bg-accent/15 border-accent/40 text-accent">v1</span>
         </div>
-        <div className="font-mono text-xs text-muted">2010-01-05 00:00 UTC</div>
+        {/* <div className="font-mono text-xs text-muted">2010-01-05 00:00 UTC</div>
         <Timeline progress={progress} onScrub={setProgress} />
         <div className="flex items-center gap-1">
           <IconBtn><SkipBack className="h-4 w-4" /></IconBtn>
@@ -70,7 +81,7 @@ function AtmosphericEngine() {
           <button className="ml-1 flex h-8 items-center gap-1 rounded-md border border-border bg-panel-2 px-2 text-xs">
             1x <ChevronDown className="h-3 w-3" />
           </button>
-        </div>
+        </div> */}
       </header>
 
       {/* MAIN */}
@@ -85,15 +96,22 @@ function AtmosphericEngine() {
             <Field label="Basemap">
               <Select value="OSM Standard" />
             </Field>
-            <Field label="Frame / Time">
+            
+            {/* <Field label="Frame / Time">
               <div className="font-mono text-xs text-muted">2010-01-05 00:00 UTC</div>
+              
               <input type="range" className="mt-2 w-full accent-[var(--accent)]" />
               <div className="mt-2 flex items-center gap-1">
                 <IconBtn small><ChevronLeft className="h-3.5 w-3.5" /></IconBtn>
                 <IconBtn small><Calendar className="h-3.5 w-3.5" /></IconBtn>
                 <IconBtn small><ChevronRight className="h-3.5 w-3.5" /></IconBtn>
               </div>
+            </Field> */}
+
+            <Field label="Timeline">
+              <TimelineControl />
             </Field>
+
             <Field label={`Opacity`} rightLabel={`${opacity}%`}>
               <input
                 type="range" min={0} max={100} value={opacity}

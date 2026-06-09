@@ -4,6 +4,10 @@ import maplibregl from "maplibre-gl";
 import { BASINS, basinFeatureCollection, type BasinId } from "./basins";
 import { loadTemperatureFrame } from "@/services/raster";
 import { useEffect, useRef, useState } from "react";
+import { useDatasetStore } from "../../core/state/datasetStore";
+import { loadDatasetManifest } from "../../services/raster";
+import { loadFrame } from "../../core/datasets/frameLoader";
+import { useFrame, useSelectedDatasetId, useVariable } from "../../core/state/selectors";
 
 interface Props {
   opacity: number;
@@ -16,17 +20,28 @@ interface Props {
 
 
 
-export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Props) {
+
+export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props) {
   const [manifestLoaded, setManifestLoaded] = useState(false);
-  
+  const [mapLoaded, setMapLoaded] = useState(false);
+
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const onSelectRef = useRef(onSelectBasin);
   onSelectRef.current = onSelectBasin;
   const manifestRef = useRef<any>(null);
+  const frame = useFrame();
 
-  async function drawTemperatureFrame(frame = 0) {
+  const datasetId = useSelectedDatasetId();
+
+  const variable = useVariable();
+
+  async function drawTemperatureFrame(
+    frame: number,
+    datasetId: string,
+    variable: string
+  ) {
     const canvas = overlayRef.current;
     if (!canvas) return;
 
@@ -35,11 +50,17 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
 
     const manifest = manifestRef.current;
     if (!manifest) return;
-    
+
     const width = manifest.width;
     const height = manifest.height;
 
-    const data = await loadTemperatureFrame(frame);
+    // const data = await loadTemperatureFrame(frame);
+    const data =
+      await loadFrame({
+        datasetId,
+        variable,
+        frame,
+      });
 
     let min = Infinity;
     let max = -Infinity;
@@ -79,7 +100,7 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
 
     console.log('clientHeight: ', canvas.clientHeight)
     canvas.width = canvas.clientWidth;
-    console.log('clientWidth: ',canvas.clientWidth)
+    console.log('clientWidth: ', canvas.clientWidth)
     canvas.height = canvas.clientHeight;
 
 
@@ -90,10 +111,10 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
       canvas.height
     );
 
-    
-    console.log('bbox',manifestRef.current.bbox);
+
+    console.log('bbox', manifestRef.current.bbox);
     const bbox = manifestRef.current.bbox;
-    
+
     const map = mapRef.current;
     console.log(map)
     const nw = map.project([
@@ -112,7 +133,7 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
       se.x - nw.x,
       se.y - nw.y
     );
-    
+
 
     ctx.strokeStyle = "red";
     ctx.lineWidth = 4;
@@ -132,21 +153,30 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
 
   useEffect(() => {
     async function init() {
-      const manifest = await loadManifest();
+      const manifest = await loadDatasetManifest();
 
       manifestRef.current = manifest;
-
+      setManifestLoaded(true);
       console.log("Manifest loaded", manifest);
     }
 
     init();
   }, []);
-  
-  useEffect(() => {
-    if (!manifestLoaded) return;
 
-    drawTemperatureFrame(0);
-  }, [manifestLoaded]);
+  useEffect(() => {
+    if (!mapLoaded)
+      return;
+
+    if (!manifestLoaded)
+      return;
+
+    drawTemperatureFrame(frame);
+
+  }, [
+    mapLoaded,
+    manifestLoaded,
+    frame,
+  ]);
 
   // Mount map once
   useEffect(() => {
@@ -177,15 +207,13 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
       zoom: 5.6,
       attributionControl: false,
     });
-   
+
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-left");
 
     mapRef.current = map;
 
     map.on("load", () => {
-      setTimeout(() => {
-        drawTemperatureFrame(0);
-      }, 100);
+      
       map.addSource("basins", { type: "geojson", data: basinFeatureCollection as never });
 
       map.addLayer({
@@ -255,10 +283,12 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
       map.on("mouseenter", "basins-fill", () => (map.getCanvas().style.cursor = "pointer"));
       map.on("mouseleave", "basins-fill", () => (map.getCanvas().style.cursor = ""));
 
+      setMapLoaded(true);
+
     });
   }, []);
 
-  
+
 
 
   // Update selection styling + fly to basin
@@ -298,14 +328,14 @@ export function MapView({  selectedBasin, onSelectBasin, visibleOverlays }: Prop
   }, [selectedBasin]);
 
 
-  
+
   // return (
   //   <div className="relative h-full w-full overflow-hidden rounded-lg">
   return (
     <div
       className="relative h-full w-full"
     >
-      <div ref={ref} className="absolute inset-0 z-10 border-blue"  />
+      <div ref={ref} className="absolute inset-0 z-10 border-blue" />
       <canvas
         ref={overlayRef}
         className="pointer-events-none absolute inset-0  z-10 border-green w-full h-full "

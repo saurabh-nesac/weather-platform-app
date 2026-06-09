@@ -1,9 +1,26 @@
-export async function loadTemperatureFrame(frame: number) {
-    const file = `/data/temperature/temp_${frame
-        .toString()
-        .padStart(3, "0")}.bin`;
+//frontend-react/src/services/raster.ts
+import { DatasetManifest } from "../core/state/types";
+// src/core/datasets/frameLoader.ts
 
-    const res = await fetch(file);
+
+import type { FrameRequest } from "../core/state/types";
+
+export async function loadFrame({
+    datasetId,
+    variable,
+    frame,
+}: FrameRequest) {
+
+    const frameStr =
+        frame
+            .toString()
+            .padStart(3, "0");
+
+    const file =
+        `/data/${datasetId}/${variable}/${frameStr}.bin`;
+
+    const res =
+        await fetch(file);
 
     if (!res.ok) {
         throw new Error(
@@ -17,8 +34,14 @@ export async function loadTemperatureFrame(frame: number) {
 }
 
 
-export async function loadManifest(){
-    const file = `data/temperature/manifest.json`
-    const res = await fetch(file)
-    return res.json()
+export async function
+    loadDatasetManifest():
+    Promise<DatasetManifest> {
+
+    const res =
+        await fetch(
+            "/data/temperature/manifest.json"
+        );
+
+    return await res.json();
 }

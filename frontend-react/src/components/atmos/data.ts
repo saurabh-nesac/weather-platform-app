@@ -1,3 +1,4 @@
+// frontend-react/src/components/atmos/data.ts
 // Deterministic mock data + real thermodynamics ported from the reference
 // FastAPI backend (atmospheric-engine/app/thermodynamics/*).
 // Constants and formulas match build_sounding.py, moisture.py, saturation.py,
