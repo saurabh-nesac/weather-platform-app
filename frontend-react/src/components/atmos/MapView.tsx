@@ -8,6 +8,10 @@ import { useDatasetStore } from "../../core/state/datasetStore";
 import { loadDatasetManifest } from "../../services/raster";
 import { loadFrame } from "../../core/datasets/frameLoader";
 import { useFrame, useSelectedDatasetId, useVariable } from "../../core/state/selectors";
+import {
+  getFrame,
+} from "../../core/datasets/frameManager";
+
 
 interface Props {
   opacity: number;
@@ -16,8 +20,6 @@ interface Props {
   onSelectBasin: (id: BasinId) => void;
   visibleOverlays: Record<string, boolean>;
 }
-
-
 
 
 
@@ -55,12 +57,25 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     const height = manifest.height;
 
     // const data = await loadTemperatureFrame(frame);
-    const data =
-      await loadFrame({
+    // const loadedFrame =
+    //   await loadFrame({
+    //     datasetId,
+    //     variable,
+    //     frame
+    //   });
+    
+    const raster =
+      await getFrame({
         datasetId,
         variable,
         frame,
       });
+    const data = raster.data
+
+    console.log(
+      data[0],
+      data[1000]
+    );
 
     let min = Infinity;
     let max = -Infinity;
@@ -93,7 +108,6 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     tmp.height = height;
 
     const tctx = tmp.getContext("2d");
-    console.log(tctx)
     if (!tctx) return;
 
     tctx.putImageData(image, 0, 0);
@@ -170,7 +184,9 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     if (!manifestLoaded)
       return;
 
-    drawTemperatureFrame(frame);
+    drawTemperatureFrame(frame,
+      datasetId,variable
+      );
 
   }, [
     mapLoaded,

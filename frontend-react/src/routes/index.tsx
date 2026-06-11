@@ -30,8 +30,6 @@ export const Route = createFileRoute("/")({
 const overlays = ["Temperature", "Wind", "Pressure", "Clouds", "Precipitation", "Terrain"];
 
 function AtmosphericEngine() {
-  const [progress, setProgress] = useState(0.95);
-  const [playing, setPlaying] = useState(false);
   const [opacity, setOpacity] = useState(85);
   const [layers, setLayers] = useState<Record<string, boolean>>({
     Temperature: true, Wind: true, Pressure: false, Clouds: false, Precipitation: true, Terrain: false,
@@ -42,17 +40,8 @@ function AtmosphericEngine() {
     bootstrapDatasets();
   }, []);
 
-  console.log(
-    useDatasetStore.getState()
-  );
 
-  useEffect(() => {
-    if (!playing) return;
-    const id = setInterval(() => {
-      setProgress((p) => (p >= 1 ? 0 : p + 0.002));
-    }, 50);
-    return () => clearInterval(id);
-  }, [playing]);
+
 
   return (
     <div className="flex h-screen flex-col bg-bg text-fg">

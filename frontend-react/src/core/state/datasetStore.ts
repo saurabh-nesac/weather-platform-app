@@ -1,26 +1,10 @@
 //frontend-react/src/core/state/datasetStore.ts
 import { create } from "zustand";
+import type {
+    Dataset,
+} from "../datasets/datasetTypes";
 
-export interface Dataset {
-    id: string;
 
-    name: string;
-
-    model: string;
-
-    variables: string[];
-
-    timesteps: number;
-
-    timestamps?: string[];
-
-    bbox?: [
-        number,
-        number,
-        number,
-        number
-    ];
-}
 
 interface DatasetStore {
     availableDatasets: Dataset[];

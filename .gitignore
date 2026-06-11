@@ -16,3 +16,4 @@ frontend/dist
 backup.bundle
 frontend-react/public/data/temperature/*.bin
 repo.bundle
+frontend-react/public/data

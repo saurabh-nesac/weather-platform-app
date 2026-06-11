@@ -1,12 +1,37 @@
+// frontend-react/src/components/atmos/SkewT.tsx
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { generateSounding } from "./data";
+import { useSkewT }
+  from "../../core/skewt/useSkewT";
+
+import {
+  buildSkewTSeries
+} from "../../core/skewt/buildSkewTSeries";
+
+
 
 export function SkewT() {
+  const sounding =
+    useSkewT();
   const ref = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    const { profile: data, lclPressure, cape, cin } = generateSounding();
+    if (!sounding)
+      return;
+
+    const data =
+      buildSkewTSeries(
+        sounding
+      );
+
+    const cape =
+      sounding.surface_based
+        .cape_jkg;
+
+    const cin =
+      sounding.surface_based
+        .cin_jkg;
+
     const svg = d3.select(ref.current);
     svg.selectAll("*").remove();
     const W = ref.current!.clientWidth;
@@ -82,18 +107,18 @@ export function SkewT() {
       .attr("stroke", "oklch(0.7 0.22 25)").attr("stroke-width", 2.5)
       .attr("filter", "url(#skewt-glow)");
 
-    // LCL marker
-    if (lclPressure < 1050 && lclPressure > 100) {
-      g.append("line")
-        .attr("x1", 0).attr("x2", iw)
-        .attr("y1", y(lclPressure)).attr("y2", y(lclPressure))
-        .attr("stroke", "oklch(0.82 0.16 85)").attr("stroke-dasharray", "2 4")
-        .attr("opacity", 0.6);
-      g.append("text").attr("x", iw - 4).attr("y", y(lclPressure) - 3)
-        .attr("text-anchor", "end").attr("font-size", 9)
-        .attr("fill", "oklch(0.82 0.16 85)")
-        .text(`LCL ${lclPressure.toFixed(0)} hPa`);
-    }
+    // // LCL marker
+    // if (lclPressure < 1050 && lclPressure > 100) {
+    //   g.append("line")
+    //     .attr("x1", 0).attr("x2", iw)
+    //     .attr("y1", y(lclPressure)).attr("y2", y(lclPressure))
+    //     .attr("stroke", "oklch(0.82 0.16 85)").attr("stroke-dasharray", "2 4")
+    //     .attr("opacity", 0.6);
+    //   g.append("text").attr("x", iw - 4).attr("y", y(lclPressure) - 3)
+    //     .attr("text-anchor", "end").attr("font-size", 9)
+    //     .attr("fill", "oklch(0.82 0.16 85)")
+    //     .text(`LCL ${lclPressure.toFixed(0)} hPa`);
+    // }
 
     // CAPE / CIN readout
     svg.append("text").attr("x", W - 10).attr("y", 18)
@@ -123,7 +148,7 @@ export function SkewT() {
       sel.selectAll("text").attr("fill", "oklch(0.78 0.02 258)").attr("font-size", 10);
       sel.selectAll("line,path").attr("stroke", "oklch(0.45 0.03 262)");
     }
-  }, []);
+  }, [sounding]);
 
   return <svg ref={ref} className="h-full w-full" />;
 }

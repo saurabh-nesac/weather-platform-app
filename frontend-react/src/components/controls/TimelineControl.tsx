@@ -1,16 +1,21 @@
 // src/components/controls/TimelineControl.tsx
 
-import { useMaxFrame, useFrame, useSetFrame, useTimestamps } from "../../core/state/selectors";
+import { useMaxFrame, useFrame, useSetFrame, useTimestamps, usePlaying, useSetPlaying, useCurrentTimestamp } from "../../core/state/selectors";
 import {
     Cloud, ChevronDown, Play, Pause, RotateCcw, ChevronLeft, ChevronRight,
     SkipBack, SkipForward, Calendar, MapPin, Compass, Gauge as GaugeIcon, Activity,
     Settings2,
 } from "lucide-react";
+
+import {
+    startPlayback,
+    stopPlayback,
+} from "../../core/playback/playbackController";
 export function TimelineControl() {
     const frame = useFrame();
     const setFrame = useSetFrame();
-    const timestamps =
-        useTimestamps();
+    const timestamp =
+        useCurrentTimestamp();
     const maxFrame = useMaxFrame();
 
     const previousFrame = () =>
@@ -28,14 +33,18 @@ export function TimelineControl() {
                 frame + 1
             )
         );
+    const playing =
+        usePlaying();
 
+    const setPlaying =
+        useSetPlaying();
 
 
     return (
         <div className="space-y-2">
             <div className="flex justify-between text-xs">
                 <span>
-                    {timestamps?.[frame] ??
+                    {timestamp ??
                         "No time"}
                 </span>
 
@@ -67,7 +76,35 @@ export function TimelineControl() {
                         className="h-3.5 w-3.5"
                     />
                 </IconBtn>
-                <IconBtn small><Play className="h-3.5 w-3.5" /></IconBtn>
+                <IconBtn
+                    small
+                    onClick={() => {
+
+                        if (playing) {
+
+                            stopPlayback();
+                            setPlaying(false);
+
+                        } else {
+
+                            startPlayback(
+                                maxFrame
+                            );
+
+                            setPlaying(true);
+                        }
+                    }}
+                >
+                    {playing ? (
+                        <Pause
+                            className="h-3.5 w-3.5"
+                        />
+                    ) : (
+                        <Play
+                            className="h-3.5 w-3.5"
+                        />
+                    )}
+                </IconBtn>
                 <IconBtn
                     small
                     onClick={nextFrame}

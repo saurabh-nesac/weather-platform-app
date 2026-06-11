@@ -1,3 +1,4 @@
+// frontend-react/src/core/state/selectors.ts
 import { useAtmosStore } from "./atmosStore";
 import { useDatasetStore } from "./datasetStore";
 
@@ -44,7 +45,7 @@ export const useMaxFrame =
         );
 
 export const useTimestamps = () =>
-    useDatasetStore((s) => {        
+    useDatasetStore((s) => {
 
         const ds =
             s.availableDatasets.find(
@@ -53,7 +54,7 @@ export const useTimestamps = () =>
                     s.selectedDatasetId
             );
 
-        
+
 
         return ds?.timestamps;
     });
@@ -63,3 +64,54 @@ export const useSelectedDatasetId =
         useDatasetStore(
             s => s.selectedDatasetId
         );
+// selectors.ts
+
+export const useCurrentTimestamp =
+    () => {
+
+        const frame =
+            useFrame();
+
+        const timestamps =
+            useTimestamps();
+
+        return timestamps?.[
+            frame
+        ];
+    };
+
+export const usePlaying =
+    () =>
+        useAtmosStore(
+            s => s.playing
+        );
+
+export const useSetPlaying =
+    () =>
+        useAtmosStore(
+            s => s.setPlaying
+        );
+
+
+const DEFAULT_POINT = {
+    lat: 26.1445,
+    lon: 91.7362,
+    name: "Guwahati",
+};
+
+// export const useActivePoint =
+//     () => {
+
+//         const point =
+//             useSelectedPoint();
+
+//         return point ??
+//             DEFAULT_POINT;
+//     };
+
+
+export const useActivePoint =
+    () =>
+        useAtmosStore(
+            s => s.selectedPoint
+        ) ?? DEFAULT_POINT;

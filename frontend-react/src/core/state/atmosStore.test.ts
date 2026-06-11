@@ -293,5 +293,86 @@ describe(
                 ).toBeNull();
             }
         );
+
+        it(
+            "starts paused",
+            () => {
+
+                expect(
+                    useAtmosStore
+                        .getState()
+                        .playing
+                ).toBe(
+                    false
+                );
+            }
+        );
+        it(
+            "can start playback",
+            () => {
+
+                useAtmosStore
+                    .getState()
+                    .setPlaying(
+                        true
+                    );
+
+                expect(
+                    useAtmosStore
+                        .getState()
+                        .playing
+                ).toBe(
+                    true
+                );
+            }
+        );
+        it(
+            "can stop playback",
+            () => {
+
+                const store =
+                    useAtmosStore
+                        .getState();
+
+                store.setPlaying(
+                    true
+                );
+
+                store.setPlaying(
+                    false
+                );
+
+                expect(
+                    useAtmosStore
+                        .getState()
+                        .playing
+                ).toBe(
+                    false
+                );
+            }
+        );
+        it(
+            "reset clears playback",
+            () => {
+
+                const store =
+                    useAtmosStore
+                        .getState();
+
+                store.setPlaying(
+                    true
+                );
+
+                store.reset();
+
+                expect(
+                    useAtmosStore
+                        .getState()
+                        .playing
+                ).toBe(
+                    false
+                );
+            }
+        );
     }
 );

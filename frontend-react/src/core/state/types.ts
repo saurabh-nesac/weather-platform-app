@@ -22,7 +22,7 @@ export interface AtmosState {
 
     renderMode: RenderMode;
 
-    
+    playing: boolean;
 }
 
 export interface DatasetManifest {
