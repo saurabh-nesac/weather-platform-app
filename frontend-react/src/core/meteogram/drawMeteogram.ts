@@ -1,16 +1,7 @@
 // frontend-react/src/core/meteogram/drawMeteogram.ts
 import { MeteogramPoint } from "./buildMeteogramSeries";
-import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { useMeteogram } from "../../core/meteogram/useMeteogram";
-import { buildMeteogramSeries } from "../../core/meteogram/buildMeteogramSeries";
-import {
-    useFrame,
-} from "../../core/state/selectors";
 
-
-
-const ref = useRef<SVGSVGElement>(null);
 
 export interface MeteogramRenderResult {
     cursor:
@@ -32,7 +23,9 @@ export function drawMeteogram(
     data: MeteogramPoint[],
     frame: number
 ) {
-    const svg = d3.select(ref.current);
+
+    const svg =
+        d3.select(svgElement);
     svg.selectAll("*").remove();
     const W = svgElement!.clientWidth;
     const H = svgElement!.clientHeight;
@@ -53,7 +46,6 @@ export function drawMeteogram(
     };
 
     const x = d3.scaleTime().domain(d3.extent(data, (d) => d.date) as [Date, Date]).range([0, iw]);
-    xScaleRef.current = x;
 
     const root = svg.append("g").attr("transform", `translate(${m.l},${m.t})`);
 
@@ -147,18 +139,19 @@ export function drawMeteogram(
                 )
             ].date
         );
-    cursorRef.current =
+    const cursor =
         root
             .append("line")
             .attr("stroke", "white")
             .attr("stroke-width", 1)
             .attr("opacity", 0.8);
 
-    cursorRef.current
+    cursor
         .attr("x1", cursorX)
         .attr("x2", cursorX)
         .attr("y1", 0)
         .attr("y2", availH);
+
 
 
     function gridAndAxis(g: any, y: any, w: number, ticks = 4) {
@@ -171,11 +164,33 @@ export function drawMeteogram(
         g.append("g").call(d3.axisLeft(y).ticks(ticks)).call(styleAxis);
     }
 
-     function panelTitle(g: any, label: string, unit: string) {
-      g.append("text").attr("x", 0).attr("y", -4)
-        .attr("fill", "oklch(0.85 0.01 250)").attr("font-size", 10).attr("font-weight", 600)
-        .text(label);
-      g.append("text").attr("x", iw).attr("y", -4).attr("text-anchor", "end")
-        .attr("fill", "oklch(0.55 0.02 258)").attr("font-size", 9).text(unit);
+    function panelTitle(g: any, label: string, unit: string) {
+        g.append("text").attr("x", 0).attr("y", -4)
+            .attr("fill", "oklch(0.85 0.01 250)").attr("font-size", 10).attr("font-weight", 600)
+            .text(label);
+        g.append("text").attr("x", iw).attr("y", -4).attr("text-anchor", "end")
+            .attr("fill", "oklch(0.55 0.02 258)").attr("font-size", 9).text(unit);
     }
+    function styleAxis(sel: any) {
+        sel.selectAll("text")
+            .attr(
+                "fill",
+                "oklch(0.7 0.02 258)"
+            )
+            .attr(
+                "font-size",
+                9
+            );
+
+        sel.selectAll("line,path")
+            .attr(
+                "stroke",
+                "oklch(0.4 0.03 262)"
+            );
+    }
+
+    return {
+        cursor,
+        xScale: x,
+    };
 }

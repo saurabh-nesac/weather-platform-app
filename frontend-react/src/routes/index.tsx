@@ -16,6 +16,8 @@ import type { BasinId } from "@/components/atmos/basins";
 import { TimelineControl } from "../components/controls/TimelineControl";
 import { bootstrapDatasets } from "../core/bootstrap/bootstrapDatasets";
 import { useDatasetStore } from "../core/state/datasetStore";
+import { useBasemap, useSetBasemap, useVariable } from "../core/state/selectors";
+import { useAtmosStore } from "../core/state/atmosStore";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,7 +42,19 @@ function AtmosphericEngine() {
     bootstrapDatasets();
   }, []);
 
+  const basemap =
+    useBasemap();
 
+  const setBasemap =
+    useSetBasemap();
+
+  const variable =
+    useVariable();
+
+  const setVariable =
+    useAtmosStore(
+      s => s.setVariable
+    );
 
 
   return (
@@ -80,11 +94,48 @@ function AtmosphericEngine() {
           <section className="panel p-3">
             <SectionTitle icon={<Settings2 className="h-3.5 w-3.5" />}>CONTROLS</SectionTitle>
             <Field label="Variable">
-              <Select value="2m Temperature" />
+              <select
+                value={variable}
+                onChange={(e) =>
+                  setVariable(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
+              >
+                <option value="T2">
+                  2m Temperature
+                </option>
+
+                <option value="RAIN">
+                  Rainfall
+                </option>
+
+                <option value="WIND10">
+                  10m Wind Speed
+                </option>
+              </select>
             </Field>
-            <Field label="Basemap">
-              <Select value="OSM Standard" />
-            </Field>
+            
+            {/* <Field label="Basemap">
+              <select
+                value={basemap}
+                onChange={(e) =>
+                  setBasemap(
+                    e.target.value as any
+                  )
+                }
+                className="w-full"
+              >
+                <option value="dark">
+                  Dark
+                </option>
+
+                <option value="osm">
+                  OSM Standard
+                </option>
+              </select>
+            </Field> */}
             
             {/* <Field label="Frame / Time">
               <div className="font-mono text-xs text-muted">2010-01-05 00:00 UTC</div>
@@ -212,14 +263,14 @@ function AtmosphericEngine() {
 
         {/* RIGHT */}
         <aside className="flex flex-col gap-3 overflow-y-auto scroll-thin">
-          <section className="panel p-3">
+          {/* <section className="panel p-3">
             <SectionTitle icon={<MapPin className="h-3.5 w-3.5" />}>LOCATION SUMMARY</SectionTitle>
             <div className="text-base font-semibold">New Delhi, India</div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <InfoBox icon="🏔️" label="Elevation" value="10 m" />
               <InfoBox icon={<Compass className="h-3.5 w-3.5" />} label="Coordinates" value="26.18° N, 91.74° E" />
             </div>
-          </section>
+          </section> */}
 
           <section className="panel p-3">
             <SectionTitle icon={<GaugeIcon className="h-3.5 w-3.5" />}>QUICK METRICS</SectionTitle>

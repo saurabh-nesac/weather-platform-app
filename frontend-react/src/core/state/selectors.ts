@@ -115,3 +115,15 @@ export const useActivePoint =
         useAtmosStore(
             s => s.selectedPoint
         ) ?? DEFAULT_POINT;
+
+export const useBasemap =
+    () =>
+        useAtmosStore(
+            s => s.basemap
+        );
+
+export const useSetBasemap =
+    () =>
+        useAtmosStore(
+            s => s.setBasemap
+        );

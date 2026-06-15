@@ -1,16 +1,17 @@
 // frontend-react/src/components/atmos/MapView.tsx
-import { loadManifest } from "@/services/raster";
+
 import maplibregl from "maplibre-gl";
 import { BASINS, basinFeatureCollection, type BasinId } from "./basins";
-import { loadTemperatureFrame } from "@/services/raster";
+
 import { useEffect, useRef, useState } from "react";
-import { useDatasetStore } from "../../core/state/datasetStore";
+
 import { loadDatasetManifest } from "../../services/raster";
-import { loadFrame } from "../../core/datasets/frameLoader";
-import { useFrame, useSelectedDatasetId, useVariable } from "../../core/state/selectors";
+
+import { useBasemap, useFrame, useSelectedDatasetId, useVariable } from "../../core/state/selectors";
 import {
-  getFrame,
+  getFrame
 } from "../../core/datasets/frameManager";
+import { RasterRenderer } from "../../rendering/raster/RasterRenderer";
 
 
 interface Props {
@@ -24,6 +25,8 @@ interface Props {
 
 
 export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props) {
+  const basemap =
+    useBasemap();
   const [manifestLoaded, setManifestLoaded] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -33,137 +36,18 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   const onSelectRef = useRef(onSelectBasin);
   onSelectRef.current = onSelectBasin;
   const manifestRef = useRef<any>(null);
-  const frame = useFrame();
+  const rendererRef = useRef<RasterRenderer | null>(null);
 
+  const [rendererReady,
+    setRendererReady] =
+    useState(false);
   const datasetId = useSelectedDatasetId();
+
+
+  const frame = useFrame();
 
   const variable = useVariable();
 
-  async function drawTemperatureFrame(
-    frame: number,
-    datasetId: string,
-    variable: string
-  ) {
-    const canvas = overlayRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const manifest = manifestRef.current;
-    if (!manifest) return;
-
-    const width = manifest.width;
-    const height = manifest.height;
-
-    // const data = await loadTemperatureFrame(frame);
-    // const loadedFrame =
-    //   await loadFrame({
-    //     datasetId,
-    //     variable,
-    //     frame
-    //   });
-    
-    const raster =
-      await getFrame({
-        datasetId,
-        variable,
-        frame,
-      });
-    const data = raster.data
-
-    console.log(
-      data[0],
-      data[1000]
-    );
-
-    let min = Infinity;
-    let max = -Infinity;
-
-    for (const v of data) {
-      if (v < min) min = v;
-      if (v > max) max = v;
-    }
-
-    const image = new ImageData(width, height);
-
-    for (let i = 0; i < data.length; i++) {
-      const value = data[i];
-
-      const n =
-        (value - min) /
-        (max - min);
-
-      const c = Math.floor(n * 255);
-
-      image.data[i * 4 + 0] = c;
-      image.data[i * 4 + 1] = c;
-      image.data[i * 4 + 2] = c;
-      image.data[i * 4 + 3] = 180;
-    }
-
-    const tmp = document.createElement("canvas");
-
-    tmp.width = width;
-    tmp.height = height;
-
-    const tctx = tmp.getContext("2d");
-    if (!tctx) return;
-
-    tctx.putImageData(image, 0, 0);
-
-    console.log('clientHeight: ', canvas.clientHeight)
-    canvas.width = canvas.clientWidth;
-    console.log('clientWidth: ', canvas.clientWidth)
-    canvas.height = canvas.clientHeight;
-
-
-    ctx.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-
-    console.log('bbox', manifestRef.current.bbox);
-    const bbox = manifestRef.current.bbox;
-
-    const map = mapRef.current;
-    console.log(map)
-    const nw = map.project([
-      bbox[0],
-      bbox[3]
-    ]);
-
-    const se = map.project([
-      bbox[2],
-      bbox[1]
-    ]);
-    ctx.drawImage(
-      tmp,
-      nw.x,
-      nw.y,
-      se.x - nw.x,
-      se.y - nw.y
-    );
-
-
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 4;
-
-    ctx.strokeRect(
-      nw.x,
-      nw.y,
-      se.x - nw.x,
-      se.y - nw.y
-    );
-
-    console.log(nw);
-    console.log(se);
-
-    console.log("Rendered frame", frame);
-  }
 
   useEffect(() => {
     async function init() {
@@ -178,20 +62,84 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   }, []);
 
   useEffect(() => {
-    if (!mapLoaded)
+
+    if (!datasetId)
       return;
 
-    if (!manifestLoaded)
+    if (!rendererRef.current)
       return;
 
-    drawTemperatureFrame(frame,
-      datasetId,variable
+    async function update() {
+
+      const rasterFrame =
+        await getFrame({
+          datasetId,
+          variable,
+          frame,
+        });
+
+      rendererRef.current!
+        .renderFrame(rasterFrame);
+    }
+
+    update();
+
+  }, [
+    datasetId,
+    variable,
+    frame,
+    rendererReady,
+  ]);
+
+
+  useEffect(() => {
+
+    if (
+      !mapLoaded ||
+      !manifestLoaded
+    ) {
+      return;
+    }
+
+    if (
+      !mapRef.current ||
+      !overlayRef.current ||
+      !manifestRef.current
+    ) {
+      return;
+    }
+
+    rendererRef.current =
+      new RasterRenderer(
+        mapRef.current,
+        overlayRef.current,
+        manifestRef.current
       );
+    const renderer = rendererRef.current;
+    mapRef.current.on("move", () => {
+      renderer.draw();
+    })
+    mapRef.current.on("zoom", () => {
+      renderer.draw();
+    })
+    mapRef.current.on("resize", () => {
+      renderer.draw();
+    })
+    mapRef.current.on("moveend", () => {
+      renderer.draw();
+    });
+    setRendererReady(true);
+
+    console.log(
+      "render effect",
+      datasetId,
+      rendererRef.current
+    );
 
   }, [
     mapLoaded,
     manifestLoaded,
-    frame,
+
   ]);
 
   // Mount map once
@@ -204,13 +152,13 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
         sources: {
           osm: {
             type: "raster",
-            tiles: ["https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"],
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
             attribution: "© OpenStreetMap, © CARTO",
           },
           labels: {
             type: "raster",
-            tiles: ["https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png"],
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
           },
         },
@@ -229,7 +177,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     mapRef.current = map;
 
     map.on("load", () => {
-      
+
       map.addSource("basins", { type: "geojson", data: basinFeatureCollection as never });
 
       map.addLayer({
@@ -354,9 +302,9 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
       <div ref={ref} className="absolute inset-0 z-10 border-blue" />
       <canvas
         ref={overlayRef}
-        className="pointer-events-none absolute inset-0  z-10 border-green w-full h-full "
+        className="pointer-events-none absolute inset-0  z-10 w-full h-full "
       />
-      <div className="absolute left-3 top-3 z-10 flex gap-2">
+      <div className="absolute left-3 top-3 z-20 flex gap-2">
         <span className="chip bg-accent/20 border-accent/40 text-accent-foreground">
           FOCUS: NE INDIA — BASINS
         </span>
@@ -378,7 +326,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
 function ColorBar() {
   return (
-    <div className="absolute bottom-3 left-3 z-10 w-64 rounded bg-black/40 p-2 backdrop-blur-sm">
+    <div className="absolute bottom-3 left-3 z-30 w-64 rounded bg-black/40 p-2 backdrop-blur-sm">
       <div className="mb-1 text-[10px] text-muted">°C</div>
       <div
         className="h-3 w-full rounded"

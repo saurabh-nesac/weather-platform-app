@@ -1,3 +1,5 @@
+import { BasemapType } from "../../maps/basemaps";
+
 export type Point = {
     lat: number;
     lon: number;
@@ -11,7 +13,7 @@ export type RenderMode =
 export interface AtmosState {
 
     variable: string;
-
+    basemap:BasemapType;
     frame: number;
 
     opacity: number;

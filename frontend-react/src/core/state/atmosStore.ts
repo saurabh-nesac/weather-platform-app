@@ -1,3 +1,4 @@
+
 // frontend-react/src/core/state/atmosStore.ts
 import { create } from "zustand";
 import {
@@ -5,6 +6,7 @@ import {
     Point,
     RenderMode,
 } from "./types";
+import { BasemapType } from "../../maps/basemaps";
 
 interface AtmosActions {
 
@@ -12,7 +14,9 @@ interface AtmosActions {
     setVariable: (
         variable: string
     ) => void;
-
+    setBasemap: (
+        basemap: BasemapType
+    ) => void;
     setFrame: (
         frame: number
     ) => void;
@@ -46,7 +50,7 @@ type Store =
 const initialState: AtmosState = {
 
     variable: "T2",
-
+    basemap: "dark",
     frame: 0,
 
     opacity: 1,
@@ -67,6 +71,12 @@ export const useAtmosStore =
         setVariable: (variable) =>
             set({ variable }),
 
+        setBasemap: (
+            basemap
+        ) =>
+            set({
+                basemap,
+            }),
         setFrame: (frame) =>
             set({ frame }),
 
