@@ -34,9 +34,7 @@ export async function loadFrame({
 }
 
 
-export async function
-    loadDatasetManifest():
-    Promise<DatasetManifest> {
+export async function loadDatasetManifest(): Promise<DatasetManifest> {
 
     const res =
         await fetch(

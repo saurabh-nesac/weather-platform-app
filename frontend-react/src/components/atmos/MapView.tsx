@@ -5,7 +5,7 @@ import { BASINS, basinFeatureCollection, type BasinId } from "./basins";
 
 import { useEffect, useRef, useState } from "react";
 
-import { loadDatasetManifest } from "../../services/raster";
+import { loadDatasetManifest } from "@/core/datasets/datasetLoader";
 
 import { useBasemap, useFrame, useSelectedDatasetId, useVariable } from "../../core/state/selectors";
 import {
@@ -51,7 +51,8 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
   useEffect(() => {
     async function init() {
-      const manifest = await loadDatasetManifest();
+      
+      const manifest = await loadDatasetManifest(variable);
 
       manifestRef.current = manifest;
       setManifestLoaded(true);
@@ -68,15 +69,15 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
     if (!rendererRef.current)
       return;
+    const currentDatasetId = datasetId;
 
     async function update() {
 
-      const rasterFrame =
-        await getFrame({
-          datasetId,
-          variable,
-          frame,
-        });
+      const rasterFrame = await getFrame({
+        datasetId: currentDatasetId,
+        variable,
+        frame,
+      });
 
       rendererRef.current!
         .renderFrame(rasterFrame);

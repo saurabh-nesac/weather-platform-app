@@ -3,7 +3,7 @@ import {
     sampleTemperatureColor
 } from "../colors/temperature";
 import type { DatasetManifest, RasterFrame } from "../../core/datasets/datasetTypes";
-import maplibregl from "maplibre-gl";
+import maplibregl, { validate } from "maplibre-gl";
 
 export class RasterRenderer {
     constructor(
@@ -26,8 +26,10 @@ export class RasterRenderer {
         const map = this.map;
         
         const framefetched = this.currentFrame
-        if(!framefetched.data)
+        if(!framefetched)
             return;
+
+        const data = framefetched.data
 
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
@@ -37,32 +39,15 @@ export class RasterRenderer {
         const height = manifest.height;
 
 
-
-        const data = framefetched.data
-
-        console.log(
-            data[0],
-            data[1000]
-        );
-
-        let min = Infinity;
-        let max = -Infinity;
-
-        for (const v of data) {
-            if (v < min) min = v;
-            if (v > max) max = v;
-        }
+        // let min = Infinity;
+        // let max = -Infinity;
+        const min = manifest.min;
+        const max = manifest.max;
 
         const image = new ImageData(width, height);
 
         for (let i = 0; i < data.length; i++) {
             const value = data[i];
-
-            const range = max - min || 1;
-
-            const n =
-                (value - min) /
-                range;
 
             const [r, g, b] =
                 sampleTemperatureColor(
@@ -95,9 +80,7 @@ export class RasterRenderer {
 
         tctx.putImageData(image, 0, 0);
 
-        console.log('clientHeight: ', canvas.clientHeight)
         canvas.width = canvas.clientWidth;
-        console.log('clientWidth: ', canvas.clientWidth)
         canvas.height = canvas.clientHeight;
 
         ctx.clearRect(
@@ -107,11 +90,9 @@ export class RasterRenderer {
             canvas.height
         );
 
-        console.log('bbox', manifest.bbox);
 
         const bbox = manifest.bbox;
 
-        console.log(map)
 
         const nw = map.project([
             bbox[0],
@@ -123,37 +104,9 @@ export class RasterRenderer {
             bbox[1]
         ]);
 
-        console.log(
-            "bbox",
-            bbox
-        );
 
-        console.log(
-            "canvas",
-            canvas.width,
-            canvas.height
-        );
 
-        console.log(
-            "nw",
-            nw
-        );
 
-        console.log(
-            "se",
-            se
-        );
-        console.log(
-            "canvas",
-            canvas.width,
-            canvas.height
-        );
-
-        console.log(
-            "draw size",
-            se.x - nw.x,
-            se.y - nw.y
-        );
         ctx.save();
 
         ctx.scale(1, -1);
@@ -168,20 +121,8 @@ export class RasterRenderer {
 
         ctx.restore();
 
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 4;
 
-        ctx.strokeRect(
-            nw.x,
-            nw.y,
-            se.x - nw.x,
-            se.y - nw.y
-        );
 
-        console.log(nw);
-        console.log(se);
-
-        console.log("Rendered frame", framefetched);
     }
 
 }

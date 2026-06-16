@@ -18,6 +18,10 @@ import { bootstrapDatasets } from "../core/bootstrap/bootstrapDatasets";
 import { useDatasetStore } from "../core/state/datasetStore";
 import { useBasemap, useSetBasemap, useVariable } from "../core/state/selectors";
 import { useAtmosStore } from "../core/state/atmosStore";
+import {
+  useSetPlaying,
+  useSetFrame,
+} from "../core/state/selectors";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,19 +46,18 @@ function AtmosphericEngine() {
     bootstrapDatasets();
   }, []);
 
-  const basemap =
-    useBasemap();
+  const setPlaying = useSetPlaying();
+  const setFrame = useSetFrame();
 
-  const setBasemap =
-    useSetBasemap();
+  const basemap = useBasemap();
 
-  const variable =
-    useVariable();
+  const setBasemap = useSetBasemap();
 
-  const setVariable =
-    useAtmosStore(
-      s => s.setVariable
-    );
+  const variable = useVariable();
+
+  const setVariable = useAtmosStore(
+    s => s.setVariable
+  );
 
 
   return (
@@ -116,7 +119,7 @@ function AtmosphericEngine() {
                 </option>
               </select>
             </Field>
-            
+
             {/* <Field label="Basemap">
               <select
                 value={basemap}
@@ -136,7 +139,7 @@ function AtmosphericEngine() {
                 </option>
               </select>
             </Field> */}
-            
+
             {/* <Field label="Frame / Time">
               <div className="font-mono text-xs text-muted">2010-01-05 00:00 UTC</div>
               
@@ -173,7 +176,7 @@ function AtmosphericEngine() {
                 <Pause className="h-3.5 w-3.5" /> Pause
               </button>
               <button
-                onClick={() => setProgress(0)}
+                onClick={() => setFrame(0)}
                 className="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-panel-2 py-2 text-sm"
               >
                 <RotateCcw className="h-3.5 w-3.5" /> Reset Time
@@ -188,9 +191,9 @@ function AtmosphericEngine() {
               Data loaded
             </div>
             <dl className="mt-3 space-y-1.5 text-xs">
-              <Row k="Model" v="NorESM1-M" />
-              <Row k="Resolution" v="~10 km (10-day avg)" />
-              <Row k="Last update" v="12:39:42 UTC" />
+              <Row k="Model" v="WRF" />
+              <Row k="Resolution" v="~3 km (3-day avg)" />
+              <Row k="Last update" v="2025-10-15T 0Z" />
             </dl>
           </section>
 

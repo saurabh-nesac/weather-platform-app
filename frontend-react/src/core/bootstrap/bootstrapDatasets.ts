@@ -8,40 +8,53 @@ import {
     useDatasetStore,
 } from "../state/datasetStore";
 
+import { VARIABLES } from "../config/variables";
+
 export async function
     bootstrapDatasets() {
-
-    const manifest =
-        await loadDatasetManifest();
 
     const store =
         useDatasetStore.getState();
 
-    store.addDataset({
-        id:
-            manifest.dataset_id,
+    for (const variable of VARIABLES) {
 
-        name:
-            manifest.dataset_id,
+        try{
 
-        model:
-            "WRF",
+            const manifest =
+            await loadDatasetManifest(
+                variable
+            );
+            
+            store.addDataset({
+            id: variable,
 
-        variables: [
-            manifest.variable,
-        ],
+            name:
+                manifest.long_name,
 
-        timesteps:
+            model: "WRF",
+
+            variables: [
+                variable,
+            ],
+
+            timesteps:
             manifest.frames,
-
-        timestamps:
-            manifest.timestamps,
-
-        bbox:
-            manifest.bbox,
-    });
+            
+            timestamps:
+                manifest.timestamps,
+                
+                bbox:
+                manifest.bbox,
+            });
+        }
+        catch(err){
+            console.error(
+                `Failed to load ${variable}`,
+                err)
+        }
+    }
 
     store.selectDataset(
-        manifest.dataset_id
+        "T2"
     );
 }
