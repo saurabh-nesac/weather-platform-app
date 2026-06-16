@@ -49,7 +49,7 @@ type Store =
 
 const initialState: AtmosState = {
 
-    variable: "t2",
+    variable: "T2",
     basemap: "dark",
     frame: 0,
 
