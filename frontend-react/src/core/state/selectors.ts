@@ -11,38 +11,39 @@ export const useVariable = () =>
 export const useSelectedPoint = () =>
     useAtmosStore((s) => s.selectedPoint);
 
+export const useSetSelectedPoint =    () =>
+        useAtmosStore(
+            s => s.setSelectedPoint
+        );
+
 export const useSetFrame = () =>
     useAtmosStore((s) => s.setFrame);
 
-export const useSelectedDataset =
-    () =>
-        useDatasetStore(
-            (s) =>
-                s.availableDatasets.find(
-                    (d) =>
-                        d.id ===
-                        s.selectedDatasetId
-                )
+export const useSelectedDataset = () =>
+    useDatasetStore((s) =>
+        s.availableDatasets.find(
+            (d) =>
+                d.id ===
+                s.selectedDatasetId
+        )
+    );
+
+
+export const useMaxFrame = () =>
+    useDatasetStore((s) => {
+        const ds =
+            s.availableDatasets.find(
+                (d) =>
+                    d.id ===
+                    s.selectedDatasetId
+            );
+
+        return Math.max(
+            0,
+            (ds?.timesteps ?? 1) - 1
         );
-
-
-export const useMaxFrame =
-    () =>
-        useDatasetStore(
-            (s) => {
-                const ds =
-                    s.availableDatasets.find(
-                        (d) =>
-                            d.id ===
-                            s.selectedDatasetId
-                    );
-
-                return Math.max(
-                    0,
-                    (ds?.timesteps ?? 1) - 1
-                );
-            }
-        );
+    }
+    );
 
 export const useTimestamps = () =>
     useDatasetStore((s) => {
@@ -59,38 +60,34 @@ export const useTimestamps = () =>
         return ds?.timestamps;
     });
 
-export const useSelectedDatasetId =
-    () =>
-        useDatasetStore(
-            s => s.selectedDatasetId
-        );
+export const useSelectedDatasetId = () =>
+    useDatasetStore(
+        s => s.selectedDatasetId
+    );
 // selectors.ts
 
-export const useCurrentTimestamp =
-    () => {
+export const useCurrentTimestamp = () => {
 
-        const frame =
-            useFrame();
+    const frame =
+        useFrame();
 
-        const timestamps =
-            useTimestamps();
+    const timestamps =
+        useTimestamps();
 
-        return timestamps?.[
-            frame
-        ];
-    };
+    return timestamps?.[
+        frame
+    ];
+};
 
-export const usePlaying =
-    () =>
-        useAtmosStore(
-            s => s.playing
-        );
+export const usePlaying = () =>
+    useAtmosStore(
+        s => s.playing
+    );
 
-export const useSetPlaying =
-    () =>
-        useAtmosStore(
-            s => s.setPlaying
-        );
+export const useSetPlaying = () =>
+    useAtmosStore(
+        s => s.setPlaying
+    );
 
 
 const DEFAULT_POINT = {
@@ -110,20 +107,17 @@ const DEFAULT_POINT = {
 //     };
 
 
-export const useActivePoint =
-    () =>
-        useAtmosStore(
-            s => s.selectedPoint
-        ) ?? DEFAULT_POINT;
+export const useActivePoint = () =>
+    useAtmosStore(
+        s => s.selectedPoint
+    ) ?? DEFAULT_POINT;
 
-export const useBasemap =
-    () =>
-        useAtmosStore(
-            s => s.basemap
-        );
+export const useBasemap = () =>
+    useAtmosStore(
+        s => s.basemap
+    );
 
-export const useSetBasemap =
-    () =>
-        useAtmosStore(
-            s => s.setBasemap
-        );
+export const useSetBasemap = () =>
+    useAtmosStore(
+        s => s.setBasemap
+    );

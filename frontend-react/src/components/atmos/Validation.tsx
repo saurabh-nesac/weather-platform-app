@@ -1,3 +1,4 @@
+// frontend-react/src/components/atmos/Validation.tsx
 import { BASINS, type BasinId } from "./basins";
 import { ShieldCheck } from "lucide-react";
 
@@ -48,8 +49,7 @@ export function Validation({
           );
         })}
       </div>
-
-      {/* Overlay layers (moved from Controls) */}
+{/* 
       <div className="mb-3">
         <div className="mb-1.5 text-[11px] uppercase tracking-wide text-muted">
           Overlay Layers
@@ -67,7 +67,7 @@ export function Validation({
             </label>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Metrics */}
       <div className="rounded-md border border-border bg-panel-2/60 p-2">

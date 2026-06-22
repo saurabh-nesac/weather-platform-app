@@ -82,6 +82,12 @@ def main():
 
     print(
         query_point(
+           34.71,
+            80.88
+        )
+    )
+    print(
+        query_point(
             26.18,
             91.73
         )

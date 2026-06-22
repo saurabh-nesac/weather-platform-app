@@ -7,11 +7,14 @@ import { useEffect, useRef, useState } from "react";
 
 import { loadDatasetManifest } from "@/core/datasets/datasetLoader";
 
-import { useBasemap, useFrame, useSelectedDatasetId, useVariable } from "../../core/state/selectors";
+import { useBasemap, useFrame, useSelectedDatasetId, useSelectedPoint, useVariable } from "../../core/state/selectors";
 import {
   getFrame
 } from "../../core/datasets/frameManager";
 import { RasterRenderer } from "../../rendering/raster/RasterRenderer";
+import {
+  useSetSelectedPoint,
+} from "../../core/state/selectors";
 
 
 interface Props {
@@ -25,8 +28,13 @@ interface Props {
 
 
 export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props) {
-  const basemap =
-    useBasemap();
+  const setSelectedPoint =
+    useSetSelectedPoint();
+  const markerRef =
+    useRef<
+      maplibregl.Marker | null
+    >(null);
+  const basemap =    useBasemap();
   const [manifestLoaded, setManifestLoaded] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -60,7 +68,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     }
 
     init();
-  }, []);
+  }, [variable]);
 
   useEffect(() => {
 
@@ -91,8 +99,6 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     frame,
     rendererReady,
   ]);
-
-
   useEffect(() => {
 
     if (
@@ -116,31 +122,62 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
         overlayRef.current,
         manifestRef.current
       );
-    const renderer = rendererRef.current;
+
+    const renderer =
+      rendererRef.current;
+
+    const bbox =
+      manifestRef.current.bbox;
+
+    mapRef.current.fitBounds(
+      [
+        [bbox[0], bbox[1]],
+        [bbox[2], bbox[3]],
+      ],
+      {
+        padding: 20,
+        duration: 0,
+      }
+    );
+
+    const padLon =
+      (bbox[2] - bbox[0]) * 0;
+
+    const padLat =
+      (bbox[3] - bbox[1]) * 0;
+
+    mapRef.current.setMaxBounds([
+      [
+        bbox[0] - padLon,
+        bbox[1] - padLat,
+      ],
+      [
+        bbox[2] + padLon,
+        bbox[3] + padLat,
+      ],
+    ]);
+
     mapRef.current.on("move", () => {
       renderer.draw();
-    })
+    });
+
     mapRef.current.on("zoom", () => {
       renderer.draw();
-    })
+    });
+
     mapRef.current.on("resize", () => {
       renderer.draw();
-    })
+    });
+
     mapRef.current.on("moveend", () => {
       renderer.draw();
     });
-    setRendererReady(true);
 
-    console.log(
-      "render effect",
-      datasetId,
-      rendererRef.current
-    );
+    setRendererReady(true);
 
   }, [
     mapLoaded,
     manifestLoaded,
-
   ]);
 
   // Mount map once
@@ -178,6 +215,47 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     mapRef.current = map;
 
     map.on("load", () => {
+
+      console.log(
+        "map div",
+        ref.current?.clientWidth,
+        ref.current?.clientHeight
+      );
+      map.on(
+        "click",
+        (e) => {
+
+          const point = {
+            lat: e.lngLat.lat,
+            lon: e.lngLat.lng,
+          };
+
+          setSelectedPoint(point);
+
+          if (!markerRef.current) {
+
+            markerRef.current =
+              new maplibregl.Marker({
+                color: "#ff4444",
+              });
+
+          }
+
+          markerRef.current
+            .setLngLat([
+              point.lon,
+              point.lat,
+            ])
+            .addTo(map);
+
+          console.log(
+            "Selected point",
+            point
+          );
+        }
+      );
+
+      
 
       map.addSource("basins", { type: "geojson", data: basinFeatureCollection as never });
 
@@ -292,7 +370,17 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     }
   }, [selectedBasin]);
 
+  const point =
+    useSelectedPoint();
 
+  useEffect(() => {
+
+    console.log(
+      "Selected point changed",
+      point
+    );
+
+  }, [point]);
 
   // return (
   //   <div className="relative h-full w-full overflow-hidden rounded-lg">
@@ -300,10 +388,10 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     <div
       className="relative h-full w-full"
     >
-      <div ref={ref} className="absolute inset-0 z-10 border-blue" />
+      <div ref={ref} className="absolute inset-0 z-10 border-blue h-full" />
       <canvas
         ref={overlayRef}
-        className="pointer-events-none absolute inset-0  z-10 w-full h-full "
+        className="pointer-events-none absolute inset-0  z-20 w-full h-full "
       />
       <div className="absolute left-3 top-3 z-20 flex gap-2">
         <span className="chip bg-accent/20 border-accent/40 text-accent-foreground">
@@ -316,7 +404,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
         )}
       </div>
       <ColorBar />
-      <div className="absolute bottom-3 right-3 z-10 rounded bg-black/40 px-2 py-1 text-[10px] text-muted">
+      <div className="absolute bottom-3 right-3 z-10 rounded bg-black/90 px-2 py-1 text-[10px] text-muted">
         200 km
       </div>
     </div>
@@ -327,7 +415,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
 function ColorBar() {
   return (
-    <div className="absolute bottom-3 left-3 z-30 w-64 rounded bg-black/40 p-2 backdrop-blur-sm">
+    <div className="absolute bottom-3 left-3 z-30 w-64 rounded bg-black p-2 ">
       <div className="mb-1 text-[10px] text-muted">°C</div>
       <div
         className="h-3 w-full rounded"

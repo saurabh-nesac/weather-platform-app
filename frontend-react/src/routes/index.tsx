@@ -162,7 +162,7 @@ function AtmosphericEngine() {
                 className="w-full accent-[var(--accent)]"
               />
             </Field>
-            <div className="mt-3 space-y-1.5">
+            {/* <div className="mt-3 space-y-1.5">
               <button
                 onClick={() => setPlaying(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-md bg-accent py-2 text-sm font-medium text-white shadow-[0_0_20px_color-mix(in_oklab,var(--accent)_40%,transparent)]"
@@ -181,7 +181,7 @@ function AtmosphericEngine() {
               >
                 <RotateCcw className="h-3.5 w-3.5" /> Reset Time
               </button>
-            </div>
+            </div> */}
           </section>
 
           <section className="panel p-3">
@@ -280,8 +280,8 @@ function AtmosphericEngine() {
             <div className="grid grid-cols-2 gap-2">
               <Gauge value={-1} label="Average Temperature" unit="°C" />
               <Gauge value={7} label="Maximum Temperature" unit="°C" />
-              <Gauge value={3} label="Days with Rain" min={0} max={31} />
-              <Gauge value={3} label="Days with Snow" min={0} max={31} />
+              <Gauge value={3} label="Days with Rain (Model)" min={0} max={31} />
+              <Gauge value={3} label="Days with Rain (GPM)" min={0} max={31} />
             </div>
           </section>
 

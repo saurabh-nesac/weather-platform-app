@@ -118,7 +118,15 @@ export class RasterRenderer {
             se.x - nw.x,
             se.y - nw.y
         );
+        ctx.strokeStyle = "lime";
+        ctx.lineWidth = 4;
 
+        ctx.strokeRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
         ctx.restore();
 
 
