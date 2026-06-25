@@ -121,3 +121,15 @@ export const useSetBasemap = () =>
     useAtmosStore(
         s => s.setBasemap
     );
+
+export const usePressureLevel =
+    () =>
+        useAtmosStore(
+            s => s.pressureLevel
+        );
+
+export const useSetPressureLevel =
+    () =>
+        useAtmosStore(
+            s => s.setPressureLevel
+        );

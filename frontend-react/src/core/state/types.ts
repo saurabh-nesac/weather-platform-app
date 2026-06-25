@@ -1,3 +1,4 @@
+// frontend-react/src/core/state/types.ts
 import { BasemapType } from "../../maps/basemaps";
 
 export type Point = {
@@ -5,15 +6,33 @@ export type Point = {
     lon: number;
 };
 
+const PRESSURE_LEVELS = [
+    1000,
+    925,
+    850,
+    700,
+    500,
+    300,
+    250,
+    200,
+] as const;
+
+export type PressureLevel =
+    | "surface"
+    | typeof PRESSURE_LEVELS[number];
+
 export type RenderMode =
     | "raster"
     | "contour"
     | "vectors";
 
 export interface AtmosState {
-
     variable: string;
-    basemap:BasemapType;
+
+    pressureLevel: PressureLevel;
+
+    basemap: BasemapType;
+
     frame: number;
 
     opacity: number;

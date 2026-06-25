@@ -16,12 +16,14 @@ import type { BasinId } from "@/components/atmos/basins";
 import { TimelineControl } from "../components/controls/TimelineControl";
 import { bootstrapDatasets } from "../core/bootstrap/bootstrapDatasets";
 import { useDatasetStore } from "../core/state/datasetStore";
-import { useBasemap, useSetBasemap, useVariable } from "../core/state/selectors";
+import { useBasemap, usePressureLevel, useSetBasemap, useSetPressureLevel, useVariable } from "../core/state/selectors";
 import { useAtmosStore } from "../core/state/atmosStore";
 import {
   useSetPlaying,
   useSetFrame,
 } from "../core/state/selectors";
+import { resolveVariable } from "@/core/datasets/resolveVariable";
+import { PressureLevel } from "@/core/state/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,8 +54,19 @@ function AtmosphericEngine() {
   const basemap = useBasemap();
 
   const setBasemap = useSetBasemap();
+  const baseVariable =
+    useVariable();
 
-  const variable = useVariable();
+  const pressureLevel =
+    usePressureLevel();
+  const setPressureLevel =
+    useSetPressureLevel();
+
+  const variable =
+    resolveVariable(
+      baseVariable,
+      pressureLevel
+    );
 
   const setVariable = useAtmosStore(
     s => s.setVariable
@@ -96,28 +109,100 @@ function AtmosphericEngine() {
         <aside className="flex flex-col gap-3 overflow-y-auto scroll-thin">
           <section className="panel p-3">
             <SectionTitle icon={<Settings2 className="h-3.5 w-3.5" />}>CONTROLS</SectionTitle>
-            <Field label="Variable">
+            <Field label="Variable"
+            >
+
               <select
-                value={variable}
+                value={baseVariable}
                 onChange={(e) =>
                   setVariable(
                     e.target.value
                   )
                 }
-                className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
+                
               >
-                <option value="T2">
-                  2m Temperature
+
+                <option value="TEMP">
+                  Temperature
                 </option>
 
                 <option value="RAIN">
                   Rainfall
                 </option>
 
-                <option value="WIND10">
-                  10m Wind Speed
+                <option value="WIND">
+                  Wind Speed
                 </option>
+
               </select>
+
+            </Field>
+            <Field label="Pressure Level">
+
+              <select
+                value={pressureLevel}
+                onChange={(e) => {
+
+                  const value =
+                    e.target.value;
+
+                  if (
+                    value === "surface"
+                  ) {
+
+                    setPressureLevel(
+                      "surface"
+                    );
+
+                  } else {
+
+                    setPressureLevel(
+                      Number(value) as PressureLevel
+                    );
+
+                  }
+                }}
+                className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
+              >
+
+                <option value="surface">
+                  Surface
+                </option>
+
+                <option value="1000">
+                  1000 hPa
+                </option>
+
+                <option value="925">
+                  925 hPa
+                </option>
+
+                <option value="850">
+                  850 hPa
+                </option>
+
+                <option value="700">
+                  700 hPa
+                </option>
+
+                <option value="500">
+                  500 hPa
+                </option>
+
+                <option value="300">
+                  300 hPa
+                </option>
+
+                <option value="250">
+                  250 hPa
+                </option>
+
+                <option value="200">
+                  200 hPa
+                </option>
+
+              </select>
+
             </Field>
 
             {/* <Field label="Basemap">

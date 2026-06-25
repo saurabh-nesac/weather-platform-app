@@ -40,7 +40,12 @@ def meteogram(
     total_times = 49
 
     previous_rain = 0.0
-
+ 
+    print(
+        "Meteogram request",
+        lat,
+        lon
+    )
     for time_idx in range(total_times):
 
         # ----------------------------------------------------
@@ -165,6 +170,7 @@ def meteogram(
         rain.append(
             rain_value
         )
+       
 
     # ========================================================
     # RESPONSE

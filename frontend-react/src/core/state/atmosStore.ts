@@ -4,13 +4,17 @@ import { create } from "zustand";
 import {
     AtmosState,
     Point,
+    PressureLevel,
     RenderMode,
 } from "./types";
 import { BasemapType } from "../../maps/basemaps";
 
 interface AtmosActions {
 
-
+    setPressureLevel: (
+        level: PressureLevel
+    ) => void;
+    
     setVariable: (
         variable: string
     ) => void;
@@ -49,8 +53,12 @@ type Store =
 
 const initialState: AtmosState = {
 
-    variable: "T2",
+    variable: "TEMP",
+
+    pressureLevel: "surface",
+
     basemap: "dark",
+
     frame: 0,
 
     opacity: 1,
@@ -60,14 +68,19 @@ const initialState: AtmosState = {
     selectedBasin: null,
 
     renderMode: "raster",
-    playing: false,
 
+    playing: false,
 };
 
 export const useAtmosStore =
     create<Store>((set) => ({
         ...initialState,
-
+        setPressureLevel: (
+            pressureLevel
+        ) =>
+            set({
+                pressureLevel,
+            }),
         setVariable: (variable) =>
             set({ variable }),
 

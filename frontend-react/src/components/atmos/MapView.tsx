@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { loadDatasetManifest } from "@/core/datasets/datasetLoader";
 
-import { useBasemap, useFrame, useSelectedDatasetId, useSelectedPoint, useVariable } from "../../core/state/selectors";
+import { useBasemap, useFrame, usePressureLevel, useSelectedDatasetId, useSelectedPoint, useVariable } from "../../core/state/selectors";
 import {
   getFrame
 } from "../../core/datasets/frameManager";
@@ -15,6 +15,7 @@ import { RasterRenderer } from "../../rendering/raster/RasterRenderer";
 import {
   useSetSelectedPoint,
 } from "../../core/state/selectors";
+import { resolveVariable } from "@/core/datasets/resolveVariable";
 
 
 interface Props {
@@ -57,10 +58,24 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   const variable = useVariable();
 
 
+  const pressureLevel =
+    usePressureLevel();
+
+  const resolvedVariable =
+    resolveVariable(
+      variable,
+      pressureLevel
+    );
+
+  
+
   useEffect(() => {
     async function init() {
       
-      const manifest = await loadDatasetManifest(variable);
+      const manifest =
+        await loadDatasetManifest(
+          resolvedVariable
+        );
 
       manifestRef.current = manifest;
       setManifestLoaded(true);
@@ -68,7 +83,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     }
 
     init();
-  }, [variable]);
+  }, [resolvedVariable]);
 
   useEffect(() => {
 
@@ -81,12 +96,13 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
     async function update() {
 
-      const rasterFrame = await getFrame({
-        datasetId: currentDatasetId,
-        variable,
-        frame,
-      });
-
+      const rasterFrame =
+        await getFrame({
+          datasetId: currentDatasetId,
+          variable:
+            resolvedVariable,
+          frame,
+        });
       rendererRef.current!
         .renderFrame(rasterFrame);
     }
