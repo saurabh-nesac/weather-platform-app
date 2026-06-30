@@ -8,13 +8,22 @@ import {
     RenderMode,
 } from "./types";
 import { BasemapType } from "../../maps/basemaps";
+import { DEFAULT_RENDERER_CONFIG, RendererConfig } from "@/rendering/RendererConfig";
 
 interface AtmosActions {
+    
+    updateContourConfig(
 
+        config:
+            Partial<
+                RendererConfig["contour"]
+            >
+
+    ): void;
     setPressureLevel: (
         level: PressureLevel
     ) => void;
-    
+
     setVariable: (
         variable: string
     ) => void;
@@ -70,11 +79,35 @@ const initialState: AtmosState = {
     renderMode: "raster",
 
     playing: false,
+    rendererConfig:
+        DEFAULT_RENDERER_CONFIG,
+
 };
 
 export const useAtmosStore =
     create<Store>((set) => ({
         ...initialState,
+        updateContourConfig:
+            (config) =>
+
+                set((state) => ({
+
+                    rendererConfig: {
+
+                        ...state.rendererConfig,
+
+                        contour: {
+
+                            ...state.rendererConfig.contour,
+
+                            ...config,
+
+                        },
+
+                    },
+
+                })),
+
         setPressureLevel: (
             pressureLevel
         ) =>

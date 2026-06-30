@@ -4,8 +4,9 @@ import {
 } from "../colors/temperature";
 import type { DatasetManifest, RasterFrame } from "../../core/datasets/datasetTypes";
 import maplibregl, { validate } from "maplibre-gl";
+import { Renderer } from "../Renderer";
 
-export class RasterRenderer {
+export class RasterRenderer implements Renderer {
     constructor(
         private map: maplibregl.Map,
         private canvas: HTMLCanvasElement,
@@ -62,7 +63,7 @@ export class RasterRenderer {
 
             if (
                 framefetched.variable === "RAIN" &&
-                value <= 0
+                value <= 0.1
             ) {
                 image.data[i * 4 + 3] = 0;
                 continue;

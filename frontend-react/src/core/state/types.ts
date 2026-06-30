@@ -1,4 +1,5 @@
 // frontend-react/src/core/state/types.ts
+import { RendererConfig } from "@/rendering/RendererConfig";
 import { BasemapType } from "../../maps/basemaps";
 
 export type Point = {
@@ -27,6 +28,7 @@ export type RenderMode =
     | "vectors";
 
 export interface AtmosState {
+
     variable: string;
 
     pressureLevel: PressureLevel;
@@ -44,6 +46,9 @@ export interface AtmosState {
     renderMode: RenderMode;
 
     playing: boolean;
+
+    rendererConfig: RendererConfig;
+
 }
 
 export interface DatasetManifest {

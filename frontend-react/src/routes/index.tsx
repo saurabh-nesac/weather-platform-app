@@ -16,7 +16,7 @@ import type { BasinId } from "@/components/atmos/basins";
 import { TimelineControl } from "../components/controls/TimelineControl";
 import { bootstrapDatasets } from "../core/bootstrap/bootstrapDatasets";
 import { useDatasetStore } from "../core/state/datasetStore";
-import { useBasemap, usePressureLevel, useSetBasemap, useSetPressureLevel, useVariable } from "../core/state/selectors";
+import { useBasemap, useContourColorScheme, useContourInterval, useContourLineWidth, usePressureLevel, useSetBasemap, useSetPressureLevel, useShowContourLabels, useUpdateContourConfig, useVariable } from "../core/state/selectors";
 import { useAtmosStore } from "../core/state/atmosStore";
 import {
   useSetPlaying,
@@ -47,7 +47,23 @@ function AtmosphericEngine() {
   useEffect(() => {
     bootstrapDatasets();
   }, []);
+  // const contourInterval =
+  //   useContourInterval();
 
+  const contourInterval =
+    useContourInterval();
+
+  const contourLineWidth =
+    useContourLineWidth();
+
+  const contourColorScheme =
+    useContourColorScheme();
+
+  const showContourLabels =
+    useShowContourLabels();
+
+  const updateContourConfig =
+    useUpdateContourConfig();
   const setPlaying = useSetPlaying();
   const setFrame = useSetFrame();
 
@@ -71,7 +87,15 @@ function AtmosphericEngine() {
   const setVariable = useAtmosStore(
     s => s.setVariable
   );
+  const renderMode =
+    useAtmosStore(
+      s => s.renderMode
+    );
 
+  const setRenderMode =
+    useAtmosStore(
+      s => s.setRenderMode
+    );
 
   return (
     <div className="flex h-screen flex-col bg-bg text-fg">
@@ -205,6 +229,173 @@ function AtmosphericEngine() {
 
             </Field>
 
+            <Field label="Render Mode">
+
+              <select
+
+                value={renderMode}
+
+                onChange={(e) =>
+
+                  setRenderMode(
+                    e.target.value as
+                    "raster" | "contour"
+                  )
+
+                }
+
+                className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
+
+              >
+
+                <option value="raster">
+                  Raster
+                </option>
+
+                <option value="contour">
+                  Contour
+                </option>
+
+              </select>
+              {renderMode === "contour" && (
+                <section className="space-y-3">
+
+                  <h3 className="text-sm font-semibold">
+                    Contour Settings
+                  </h3>
+
+                  <Field label="Contour Interval">
+
+                    <select
+                      value={contourInterval}
+                      onChange={(e) =>
+                        updateContourConfig({
+                          interval: Number(e.target.value),
+                        })
+                      }
+                      className="w-full rounded border border-border bg-panel-2 px-2 py-1"
+                    >
+
+                      <option value={1}>1</option>
+                      <option value={2}>2</option>
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+
+                    </select>
+
+                  </Field>
+
+                  <Field label="Line Width">
+
+                    <select
+                      value={contourLineWidth}
+                      onChange={(e) =>
+                        updateContourConfig({
+                          lineWidth: Number(e.target.value),
+                        })
+                      }
+                      className="w-full rounded border border-border bg-panel-2 px-2 py-1"
+                    >
+
+                      <option value={1}>1 px</option>
+                      <option value={1.5}>1.5 px</option>
+                      <option value={2}>2 px</option>
+                      <option value={3}>3 px</option>
+
+                    </select>
+
+                  </Field>
+
+                  <Field label="Color Scheme">
+
+                    <select
+                      value={contourColorScheme}
+                      onChange={(e) =>
+                        updateContourConfig({
+                          colorScheme:
+                            e.target.value as
+                            | "temperature"
+                            | "grayscale"
+                            | "rainbow"
+                            | "single",
+                        })
+                      }
+                      className="w-full rounded border border-border bg-panel-2 px-2 py-1"
+                    >
+
+                      <option value="temperature">
+                        Temperature
+                      </option>
+
+                      <option value="grayscale">
+                        Grayscale
+                      </option>
+
+                      <option value="rainbow">
+                        Rainbow
+                      </option>
+
+                      <option value="single">
+                        Single Color
+                      </option>
+
+                    </select>
+
+                  </Field>
+
+                  <Field label="Contour Labels">
+
+                    <label className="flex items-center gap-2">
+
+                      <input
+                        type="checkbox"
+                        checked={showContourLabels}
+                        onChange={(e) =>
+                          updateContourConfig({
+                            showLabels:
+                              e.target.checked,
+                          })
+                        }
+                      />
+
+                      <span>Show Labels</span>
+
+                    </label>
+
+                  </Field>
+
+                </section>
+              )}
+            </Field>
+
+            <Field label="Contour Interval">
+
+              <select
+
+                value={contourInterval}
+
+                onChange={(e) =>
+                  updateContourConfig(
+                    {interval :Number(e.target.value)}
+                  )
+                }
+
+                className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
+
+              >
+
+                <option value={1}>1</option>
+
+                <option value={2}>2</option>
+
+                <option value={5}>5</option>
+
+                <option value={10}>10</option>
+
+              </select>
+
+            </Field>
+
             {/* <Field label="Basemap">
               <select
                 value={basemap}
@@ -314,11 +505,10 @@ function AtmosphericEngine() {
                 </thead>
                 <tbody>
                   {[
-                    ["Days with Frost", "2"], ["Days with Ice", "1"],
-                    ["Days with Rain", "8"], ["Days with Snow", "2"],
+                    ["Days with Rain", "8"], 
                     ["Average Temp (°C)", "14.2"], ["Maximum Temp (°C)", "24.7"],
                     ["Minimum Temp (°C)", "5.8"], ["Total Precip (mm)", "236"],
-                    ["Total Snow (cm)", "18"], ["Date", "2010-01-05"],
+                    ["Total Snow (cm)", "18"], ["Date", "2025-10-16"],
                   ].map(([k, v]) => (
                     <tr key={k} className="border-b border-border/60">
                       <td className="py-1.5 text-fg/90">{k}</td>

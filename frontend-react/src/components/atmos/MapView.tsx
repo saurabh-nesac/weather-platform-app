@@ -1,5 +1,5 @@
 // frontend-react/src/components/atmos/MapView.tsx
-
+import {  useRenderMode} from "@/core/state/selectors";
 import maplibregl from "maplibre-gl";
 import { BASINS, basinFeatureCollection, type BasinId } from "./basins";
 
@@ -12,10 +12,13 @@ import {
   getFrame
 } from "../../core/datasets/frameManager";
 import { RasterRenderer } from "../../rendering/raster/RasterRenderer";
+import type { Renderer } from "@/rendering/Renderer";
 import {
   useSetSelectedPoint,
 } from "../../core/state/selectors";
 import { resolveVariable } from "@/core/datasets/resolveVariable";
+import { createRenderer } from "@/rendering/RendererFactory";
+import { useAtmosStore } from "@/core/state/atmosStore";
 
 
 interface Props {
@@ -45,7 +48,9 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   const onSelectRef = useRef(onSelectBasin);
   onSelectRef.current = onSelectBasin;
   const manifestRef = useRef<any>(null);
-  const rendererRef = useRef<RasterRenderer | null>(null);
+  // const rendererRef = useRef<RasterRenderer | null>(null);
+  const rendererRef =
+    useRef<Renderer | null>(null);
 
   const [rendererReady,
     setRendererReady] =
@@ -115,6 +120,11 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     frame,
     rendererReady,
   ]);
+  const renderMode = useRenderMode();
+  const rendererConfig =
+    useAtmosStore(
+      s => s.rendererConfig
+    );
   useEffect(() => {
 
     if (
@@ -131,13 +141,29 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     ) {
       return;
     }
+    // rendererRef.current =
+    //   new RasterRenderer(
+    //     mapRef.current,
+    //     overlayRef.current,
+    //     manifestRef.current
+    //   );
 
-    rendererRef.current =
-      new RasterRenderer(
-        mapRef.current,
-        overlayRef.current,
-        manifestRef.current
-      );
+    
+
+    rendererRef.current = createRenderer(
+
+      renderMode,
+
+      mapRef.current,
+
+      overlayRef.current,
+
+      manifestRef.current,
+
+      rendererConfig
+
+
+    );
 
     const renderer =
       rendererRef.current;
@@ -194,6 +220,9 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   }, [
     mapLoaded,
     manifestLoaded,
+    renderMode,
+    rendererConfig
+
   ]);
 
   // Mount map once

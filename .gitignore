@@ -1,6 +1,6 @@
 node_modules/
 metpy-validation/
-datasets/
+
 atmospheric-engine/datasets/
 *.zarr/
 *.nc

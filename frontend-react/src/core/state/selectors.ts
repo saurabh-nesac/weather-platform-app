@@ -11,10 +11,10 @@ export const useVariable = () =>
 export const useSelectedPoint = () =>
     useAtmosStore((s) => s.selectedPoint);
 
-export const useSetSelectedPoint =    () =>
-        useAtmosStore(
-            s => s.setSelectedPoint
-        );
+export const useSetSelectedPoint = () =>
+    useAtmosStore(
+        s => s.setSelectedPoint
+    );
 
 export const useSetFrame = () =>
     useAtmosStore((s) => s.setFrame);
@@ -133,3 +133,36 @@ export const useSetPressureLevel =
         useAtmosStore(
             s => s.setPressureLevel
         );
+export const useContourInterval =
+    () =>
+        useAtmosStore(
+            s => s.rendererConfig.contour.interval
+        );
+
+export const useContourLineWidth =
+    () =>
+        useAtmosStore(
+            s => s.rendererConfig.contour.lineWidth
+        );
+
+export const useContourColorScheme =
+    () =>
+        useAtmosStore(
+            s => s.rendererConfig.contour.colorScheme
+        );
+
+export const useShowContourLabels =
+    () =>
+        useAtmosStore(
+            s => s.rendererConfig.contour.showLabels
+        );
+
+export const useUpdateContourConfig =
+    () =>
+        useAtmosStore(
+            s => s.updateContourConfig
+        );
+export const useRenderMode = () => useAtmosStore(
+    s => s.renderMode
+);
+
