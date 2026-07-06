@@ -91,11 +91,18 @@ const CASE_TABLE: Record<number, number[][]> = {
 
 };
 export function marchingSquares(
+
     data: Float32Array,
+
     width: number,
+
     height: number,
-    level: number
-): ContourSegment[] {
+
+    level: number,
+
+    threshold = -Infinity
+
+): ContourSegment[]{
 
     const segments: ContourSegment[] = [];
 
@@ -110,6 +117,15 @@ export function marchingSquares(
             const v2 = data[(y + 1) * width + x + 1];
 
             const v3 = data[(y + 1) * width + x];
+
+            if (
+                v0 < threshold &&
+                v1 < threshold &&
+                v2 < threshold &&
+                v3 < threshold
+            ) {
+                continue;
+            }
 
             let code = 0;
 

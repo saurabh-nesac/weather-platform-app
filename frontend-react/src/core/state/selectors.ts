@@ -166,3 +166,9 @@ export const useRenderMode = () => useAtmosStore(
     s => s.renderMode
 );
 
+export const useContourThreshold =
+    () =>
+        useAtmosStore(
+            s => s.rendererConfig.contour.threshold
+        );
+

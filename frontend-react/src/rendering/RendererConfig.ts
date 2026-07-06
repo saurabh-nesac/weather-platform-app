@@ -16,7 +16,8 @@ export interface RendererConfig {
         showLabels: boolean;
 
         colorScheme: ContourColorScheme;
-
+        smoothingIterations:number;
+        threshold:number;
     };
 
 }
@@ -32,9 +33,9 @@ export const DEFAULT_RENDERER_CONFIG: RendererConfig = {
         majorMultiplier: 2,
 
         showLabels: false,
-
+        smoothingIterations:5,
         colorScheme: "temperature",
-
+        threshold:0
     },
 
    

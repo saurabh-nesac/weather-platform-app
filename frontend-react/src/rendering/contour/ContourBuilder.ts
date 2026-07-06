@@ -5,14 +5,11 @@ import type {
     ContourSegment,
 } from "./MarchingSquares";
 
-export type ContourPolyline =
-    ContourPoint[];
+export type ContourPolyline = ContourPoint[];
 
 const EPS = 1e-6;
 
-function key(
-    p: ContourPoint
-): string {
+function key(p: ContourPoint): string {
 
     return (
         `${p.x.toFixed(6)},${p.y.toFixed(6)}`
@@ -32,11 +29,7 @@ function equal(
 
 }
 
-export function buildPolylines(
-
-    segments: ContourSegment[]
-
-): ContourPolyline[] {
+export function buildPolylines(segments: ContourSegment[]): ContourPolyline[] {
 
     const unused =
         new Set<number>();
@@ -88,8 +81,7 @@ export function buildPolylines(
         }
     );
 
-    const polylines:
-        ContourPolyline[] = [];
+    const polylines: ContourPolyline[] = [];
 
     while (
         unused.size > 0

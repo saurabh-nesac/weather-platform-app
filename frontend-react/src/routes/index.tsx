@@ -16,7 +16,7 @@ import type { BasinId } from "@/components/atmos/basins";
 import { TimelineControl } from "../components/controls/TimelineControl";
 import { bootstrapDatasets } from "../core/bootstrap/bootstrapDatasets";
 import { useDatasetStore } from "../core/state/datasetStore";
-import { useBasemap, useContourColorScheme, useContourInterval, useContourLineWidth, usePressureLevel, useSetBasemap, useSetPressureLevel, useShowContourLabels, useUpdateContourConfig, useVariable } from "../core/state/selectors";
+import { useBasemap, useContourColorScheme, useContourInterval, useContourLineWidth, usePressureLevel, useSetBasemap, useSetPressureLevel, useShowContourLabels, useUpdateContourConfig, useContourThreshold,useVariable } from "../core/state/selectors";
 import { useAtmosStore } from "../core/state/atmosStore";
 import {
   useSetPlaying,
@@ -24,6 +24,7 @@ import {
 } from "../core/state/selectors";
 import { resolveVariable } from "@/core/datasets/resolveVariable";
 import { PressureLevel } from "@/core/state/types";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,6 +65,10 @@ function AtmosphericEngine() {
 
   const updateContourConfig =
     useUpdateContourConfig();
+
+  const contourThreshold =
+    useContourThreshold();
+
   const setPlaying = useSetPlaying();
   const setFrame = useSetFrame();
 
@@ -143,7 +148,7 @@ function AtmosphericEngine() {
                     e.target.value
                   )
                 }
-                
+
               >
 
                 <option value="TEMP">
@@ -359,42 +364,77 @@ function AtmosphericEngine() {
                       />
 
                       <span>Show Labels</span>
-
                     </label>
-
                   </Field>
-
                 </section>
               )}
             </Field>
 
-            <Field label="Contour Interval">
+            {baseVariable === "RAIN" && (
+              <Field label="Minimum Value">
 
-              <select
+                <div className="flex gap-2">
 
-                value={contourInterval}
+                  <input
 
-                onChange={(e) =>
-                  updateContourConfig(
-                    {interval :Number(e.target.value)}
-                  )
-                }
+                    type="range"
 
-                className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
+                    min={0}
 
-              >
+                    max={20}
 
-                <option value={1}>1</option>
+                    step={0.1}
 
-                <option value={2}>2</option>
+                    value={contourThreshold}
 
-                <option value={5}>5</option>
+                    onChange={(e) =>
 
-                <option value={10}>10</option>
+                      updateContourConfig({
 
-              </select>
+                        threshold:
+                          Number(
+                            e.target.value
+                          )
 
-            </Field>
+                      })
+
+                    }
+
+                    className="flex-1"
+
+                  />
+
+                  <input
+
+                    type="number"
+
+                    min={0}
+
+                    step={0.1}
+
+                    value={contourThreshold}
+
+                    onChange={(e) =>
+
+                      updateContourConfig({
+
+                        threshold:
+                          Number(
+                            e.target.value
+                          )
+
+                      })
+
+                    }
+
+                    className="w-20 rounded border border-border bg-panel-2 px-2"
+
+                  />
+
+                </div>
+
+              </Field>
+            )}
 
             {/* <Field label="Basemap">
               <select
@@ -505,7 +545,7 @@ function AtmosphericEngine() {
                 </thead>
                 <tbody>
                   {[
-                    ["Days with Rain", "8"], 
+                    ["Days with Rain", "8"],
                     ["Average Temp (°C)", "14.2"], ["Maximum Temp (°C)", "24.7"],
                     ["Minimum Temp (°C)", "5.8"], ["Total Precip (mm)", "236"],
                     ["Total Snow (cm)", "18"], ["Date", "2025-10-16"],

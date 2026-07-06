@@ -13,6 +13,8 @@ import type { Renderer } from "../Renderer";
 import { ContourSegment, marchingSquares } from "./MarchingSquares";
 import { RendererConfig } from "../RendererConfig";
 import { drawContourLabels } from "./ContourLabel";
+import { buildPolylines, ContourPolyline } from "./ContourBuilder";
+import { chaikin } from "./ContourSmoother";
 
 export class ContourRenderer
     implements Renderer {
@@ -75,37 +77,79 @@ export class ContourRenderer
 
     }
 
-    private drawSegments(
+    private drawPolylines(
 
         ctx: CanvasRenderingContext2D,
-        segments: ContourSegment[],
+
+        polylines: ContourPolyline[],
+
         color: string,
+
         width: number
 
     ) {
 
-        ctx.beginPath();
+        ctx.save();
+
         ctx.strokeStyle = color;
+
         ctx.lineWidth = width;
 
-        for (const s of segments) {
-            const a = this.gridToScreen(
-                s.a.x,
-                s.a.y
+        ctx.lineJoin = "round";
+
+        ctx.lineCap = "round";
+
+        ctx.beginPath();
+
+        for (const polyline of polylines) {
+
+            if (
+                polyline.length < 2
+            ) {
+                continue;
+            }
+
+            const start =
+                this.gridToScreen(
+
+                    polyline[0].x,
+
+                    polyline[0].y
+
+                );
+
+            ctx.moveTo(
+                start.x,
+                start.y
             );
 
-            const b = this.gridToScreen(
-                s.b.x,
-                s.b.y
-            );
+            for (
+                let i = 1;
+                i < polyline.length;
+                i++
+            ) {
 
-            ctx.moveTo(a.x, a.y);
+                const p =
+                    this.gridToScreen(
 
-            ctx.lineTo(b.x, b.y);
+                        polyline[i].x,
+
+                        polyline[i].y
+
+                    );
+
+                ctx.lineTo(
+                    p.x,
+                    p.y
+                );
+
+            }
 
         }
 
         ctx.stroke();
+
+        ctx.restore();
 
     }
     private gridToScreen(
@@ -189,70 +233,51 @@ export class ContourRenderer
             this.canvas.width,
             this.canvas.height
         );
-        const interval = this.config.contour.interval;
-
-        const levels: number[] = [];
-
-        const min =
-            Math.floor(
-                this.manifest.min / interval
-            ) * interval;
-
-        const max =
-            Math.ceil(
-                this.manifest.max / interval
-            ) * interval;
-
-        for (
-
-            let l = min;
-
-            l <= max;
-
-            l += interval
-
-        ) {
-
-            levels.push(l);
-
-        }
+        
+        const interval =
+            this.config.contour.interval;
+        const threshold =
+            this.config.contour.threshold;
+        const levels =
+            this.contourLevels();
         for (const level of levels) {
 
-            const segments = marchingSquares(
-                this.currentFrame.data,
-                this.manifest.width,
-                this.manifest.height,
-                level
-            );
+            if (level < threshold) {
+                continue;
+            }
 
-            const major =
 
-                level %
+            const major = level % (interval * this.config.contour.majorMultiplier) === 0;
 
-                (
-                    interval *
-                    this.config.contour.majorMultiplier
-                )
 
-                === 0;
 
-            this.drawSegments(
-
-                ctx,
-
-                segments,
-
-                this.contourColor(
+            const segments =
+                marchingSquares(
+                    this.currentFrame.data,
+                    this.manifest.width,
+                    this.manifest.height,
                     level,
-                    major
-                ),
+                    threshold
+                );
 
-                major
-                    ? this.config.contour.lineWidth *
-                    this.config.contour.majorMultiplier
-                    : this.config.contour.lineWidth
+            const polylines = buildPolylines(segments);
+            
+            const smooth =
+                polylines.map(
+                    p => chaikin(
+                        p,
+                        this.config.contour.smoothingIterations
+                    )
+                );
 
-            )
+
+            this.drawPolylines(
+                ctx,
+                smooth,
+                this.contourColor(level, major),
+                major ? this.config.contour.lineWidth * this.config.contour.majorMultiplier
+                    : this.config.contour.lineWidth);
+
             if (
                 this.config.contour.showLabels
             ) {
@@ -263,7 +288,7 @@ export class ContourRenderer
 
                     this.map,
 
-                    segments,
+                    smooth,
 
                     level,
 

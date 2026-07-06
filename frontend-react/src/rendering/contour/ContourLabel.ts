@@ -2,9 +2,9 @@
 
 import maplibregl from "maplibre-gl";
 
-import type {
-    ContourSegment,
-} from "./MarchingSquares";
+import {
+    ContourPolyline,
+} from "./ContourBuilder";
 
 export interface ContourLabelOptions {
 
@@ -30,7 +30,7 @@ const DEFAULT_OPTIONS: Required<ContourLabelOptions> = {
 
     lineWidth: 3,
 
-    every: 40,
+    every: 4,
 
 };
 
@@ -40,7 +40,7 @@ export function drawContourLabels(
 
     map: maplibregl.Map,
 
-    segments: ContourSegment[],
+    polylines: ContourPolyline[],
 
     level: number,
 
@@ -70,93 +70,49 @@ export function drawContourLabels(
 
     ctx.textBaseline = "middle";
 
-    for (
+    let count = 0;
 
-        let i = 0;
+    for (const polyline of polylines) {
+        
+        console.log(polyline.length)
 
-        i < segments.length;
+        // if (
+        //     polyline.length < 2
+        // ) {
+        //     continue;
+        // }
 
-        i += cfg.every
+        //
+        // don't label every contour
+        //
+        // if (
+        //     count++ % cfg.every !== 0
+        // ) {
+        //     continue;
+        // }
 
-    ) {
+        const mid = Math.floor(polyline.length / 2);
+        console.log(mid)
 
-        const s = segments[i];
+        const pt = polyline[mid];
 
-        const mx =
+        const lon = bbox[0] + pt.x / (width - 1) * (bbox[2] - bbox[0]);
 
-            (s.a.x + s.b.x) * 0.5;
+        const lat = bbox[1] + pt.y / (height - 1) * (bbox[3] - bbox[1]);
 
-        const my =
+        const screen = map.project([lon, lat,]);
 
-            (s.a.y + s.b.y) * 0.5;
+        const text = level.toString();
 
-        const lon =
+        ctx.strokeStyle = cfg.strokeStyle;
 
-            bbox[0] +
+        ctx.lineWidth = cfg.lineWidth;
 
-            mx /
+        ctx.strokeText(text, screen.x, screen.y);
 
-            (width - 1)
+        ctx.fillStyle = cfg.fillStyle;
 
-            *
-
-            (bbox[2] - bbox[0]);
-
-        const lat =
-
-            bbox[1] +
-
-            my /
-
-            (height - 1)
-
-            *
-
-            (bbox[3] - bbox[1]);
-
-        const p = map.project([
-
-            lon,
-
-            lat,
-
-        ]);
-
-        const text =
-
-            level.toString();
-
-        ctx.strokeStyle =
-
-            cfg.strokeStyle;
-
-        ctx.lineWidth =
-
-            cfg.lineWidth;
-
-        ctx.strokeText(
-
-            text,
-
-            p.x,
-
-            p.y
-
-        );
-
-        ctx.fillStyle =
-
-            cfg.fillStyle;
-
-        ctx.fillText(
-
-            text,
-
-            p.x,
-
-            p.y
-
-        );
+        ctx.fillText(text, screen.x, screen.y);
 
     }
 
