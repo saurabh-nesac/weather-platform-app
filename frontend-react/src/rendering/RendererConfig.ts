@@ -1,3 +1,4 @@
+// frontend-react/src/rendering/RendererConfig.ts
 export type ContourColorScheme =
     | "temperature"
     | "grayscale"

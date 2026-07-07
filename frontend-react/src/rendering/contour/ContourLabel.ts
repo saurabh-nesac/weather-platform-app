@@ -74,7 +74,6 @@ export function drawContourLabels(
 
     for (const polyline of polylines) {
         
-        console.log(polyline.length)
 
         // if (
         //     polyline.length < 2
@@ -92,7 +91,6 @@ export function drawContourLabels(
         // }
 
         const mid = Math.floor(polyline.length / 2);
-        console.log(mid)
 
         const pt = polyline[mid];
 

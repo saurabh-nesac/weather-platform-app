@@ -15,6 +15,8 @@ import { RendererConfig } from "../RendererConfig";
 import { drawContourLabels } from "./ContourLabel";
 import { buildPolylines, ContourPolyline } from "./ContourBuilder";
 import { chaikin } from "./ContourSmoother";
+import { CachedContour } from "./ContourCache";
+import { MarchingSquaresCache } from "./pipeline/MarchingSquaresCache";
 
 export class ContourRenderer
     implements Renderer {
@@ -24,15 +26,38 @@ export class ContourRenderer
         private canvas: HTMLCanvasElement,
         private manifest: DatasetManifest,
         private config: RendererConfig,
-        private currentFrame: RasterFrame | null = null
+        private currentFrame: RasterFrame | null = null,
     ) { }
+
+    private marchingSquaresCache = new MarchingSquaresCache();
+
+    private cacheHits = 0;
+
+    private cacheMisses = 0;
 
     renderFrame(
         frame: RasterFrame
     ) {
+
         this.currentFrame = frame;
         this.draw();
     }
+
+    private geometryCache =
+        new Map<
+            string,
+            CachedContour
+        >();
+
+    private cacheKey(
+        frame: number,
+        level: number
+    ): string {
+
+        return `frame=${frame};level=${level};threshold=${this.config.contour.threshold};smooth=${this.config.contour.smoothingIterations}`;
+
+    }
+    private static readonly MAX_CACHE_SIZE = 300;
 
     private contourColor(
         level: number,
@@ -218,6 +243,9 @@ export class ContourRenderer
     }
 
     draw() {
+        let frameHits = 0;
+
+        let frameMisses = 0;
 
         if (!this.currentFrame)
             return;
@@ -233,7 +261,7 @@ export class ContourRenderer
             this.canvas.width,
             this.canvas.height
         );
-        
+
         const interval =
             this.config.contour.interval;
         const threshold =
@@ -249,61 +277,113 @@ export class ContourRenderer
 
             const major = level % (interval * this.config.contour.majorMultiplier) === 0;
 
+            const key =
+                this.cacheKey(
+                    this.currentFrame.frame,
+                    level
 
-
-            const segments =
-                marchingSquares(
-                    this.currentFrame.data,
-                    this.manifest.width,
-                    this.manifest.height,
-                    level,
-                    threshold
                 );
 
-            const polylines = buildPolylines(segments);
-            
-            const smooth =
-                polylines.map(
-                    p => chaikin(
-                        p,
-                        this.config.contour.smoothingIterations
-                    )
-                );
+            let cached =
+                this.geometryCache.get(key);
 
+            if (cached) {
+                frameHits++;
+                this.cacheHits++;
 
-            this.drawPolylines(
-                ctx,
-                smooth,
-                this.contourColor(level, major),
-                major ? this.config.contour.lineWidth * this.config.contour.majorMultiplier
-                    : this.config.contour.lineWidth);
+            } else {
+                frameMisses++;
+                this.cacheMisses++;
 
-            if (
-                this.config.contour.showLabels
-            ) {
+                const segments =
+                    this.marchingSquaresCache.get(
 
-                drawContourLabels(
+                        {
 
-                    ctx,
+                            frame: this.currentFrame.frame,
+                            level,
+                            threshold,
 
-                    this.map,
+                        },
 
+                        this.currentFrame.data,
+                        this.manifest.width,
+                        this.manifest.height
+
+                    );
+
+                const polylines =
+                    buildPolylines(
+                        segments
+                    );
+
+                const smooth =
+                    polylines.map(
+                        p =>
+                            chaikin(
+                                p,
+                                this.config.contour
+                                    .smoothingIterations
+                            )
+                    );
+
+                cached = {
+
+                    segments,
+                    polylines,
                     smooth,
 
-                    level,
+                };
 
-                    this.manifest.bbox,
+                if (this.geometryCache.size >= ContourRenderer.MAX_CACHE_SIZE) {
 
-                    this.manifest.width,
+                    const oldest = this.geometryCache.keys().next().value;
 
-                    this.manifest.height
+                    if (oldest) {
 
+                        this.geometryCache.delete(
+                            oldest
+                        );
+
+                    }
+
+                }
+
+                this.geometryCache.set(
+                    key,
+                    cached
                 );
 
             }
 
+            this.drawPolylines(
+                ctx,
+                cached.smooth,
+                this.contourColor(level, major),
+                major ? this.config.contour.lineWidth * this.config.contour.majorMultiplier
+                    : this.config.contour.lineWidth
+            );
+
+            if (this.config.contour.showLabels) {
+
+                drawContourLabels(
+                    ctx,
+                    this.map,
+                    cached.smooth,
+                    level,
+                    this.manifest.bbox,
+                    this.manifest.width,
+                    this.manifest.height
+                );
+            }
         }
+        console.log({
 
+            frame: this.currentFrame.frame,
+            hits: frameHits,
+            misses: frameMisses,
+            totalEntries: this.geometryCache.size,
+
+        });
     }
-
 }
