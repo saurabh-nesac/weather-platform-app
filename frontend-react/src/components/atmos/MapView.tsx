@@ -1,5 +1,5 @@
 // frontend-react/src/components/atmos/MapView.tsx
-import {  useRenderMode} from "@/core/state/selectors";
+import { useRenderBackend, useRenderMode } from "@/core/state/selectors";
 import maplibregl from "maplibre-gl";
 import { BASINS, basinFeatureCollection, type BasinId } from "./basins";
 
@@ -17,8 +17,10 @@ import {
   useSetSelectedPoint,
 } from "../../core/state/selectors";
 import { resolveVariable } from "@/core/datasets/resolveVariable";
-import { createRenderer } from "@/rendering/RendererFactory";
+import { rendererFactory } from "@/rendering/RendererFactory";
 import { useAtmosStore } from "@/core/state/atmosStore";
+import { WebGLContextManager } from "@/rendering/webgl/WebGLContextManager";
+import { RenderContext } from "@/rendering/RenderContext";
 
 
 interface Props {
@@ -32,13 +34,14 @@ interface Props {
 
 
 export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props) {
-  const setSelectedPoint =
-    useSetSelectedPoint();
-  const markerRef =
-    useRef<
-      maplibregl.Marker | null
-    >(null);
-  const basemap =    useBasemap();
+
+
+  const setSelectedPoint = useSetSelectedPoint();
+  const markerRef = useRef<maplibregl.Marker | null>(null);
+
+  const webglRef = useRef<WebGLContextManager | null>(null);
+
+  const basemap = useBasemap();
   const [manifestLoaded, setManifestLoaded] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -49,12 +52,11 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   onSelectRef.current = onSelectBasin;
   const manifestRef = useRef<any>(null);
   // const rendererRef = useRef<RasterRenderer | null>(null);
-  const rendererRef =
-    useRef<Renderer | null>(null);
 
-  const [rendererReady,
-    setRendererReady] =
-    useState(false);
+  const rendererRef = useRef<Renderer | null>(null);
+  const renderBackend = useRenderBackend();
+
+
   const datasetId = useSelectedDatasetId();
 
 
@@ -63,24 +65,17 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   const variable = useVariable();
 
 
-  const pressureLevel =
-    usePressureLevel();
+  const pressureLevel = usePressureLevel();
 
-  const resolvedVariable =
-    resolveVariable(
-      variable,
-      pressureLevel
-    );
+  const resolvedVariable = resolveVariable(variable, pressureLevel);
 
-  
+
+
 
   useEffect(() => {
     async function init() {
-      
-      const manifest =
-        await loadDatasetManifest(
-          resolvedVariable
-        );
+
+      const manifest = await loadDatasetManifest(resolvedVariable);
 
       manifestRef.current = manifest;
       setManifestLoaded(true);
@@ -90,43 +85,106 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     init();
   }, [resolvedVariable]);
 
+  const renderMode = useRenderMode();
+  const rendererConfig = useAtmosStore(s => s.rendererConfig);
+
+  // if (
+  //   !mapRef.current ||
+  //   !overlayRef.current ||
+  //   !manifestRef.current
+  // ) {
+  //   return;
+  // }
+/*
+
   useEffect(() => {
 
-    if (!datasetId)
+    if (
+      !mapLoaded || !manifestLoaded
+    ) {
       return;
-
-    if (!rendererRef.current)
-      return;
-    const currentDatasetId = datasetId;
-
-    async function update() {
-
-      const rasterFrame =
-        await getFrame({
-          datasetId: currentDatasetId,
-          variable:
-            resolvedVariable,
-          frame,
-        });
-      rendererRef.current!
-        .renderFrame(rasterFrame);
     }
 
-    update();
+    if (
+      !mapRef.current || !overlayRef.current || !manifestRef.current
+    ) {
+      return;
+    }
+
+    if (
+      renderBackend === "webgl" && !webglRef.current
+    ) {
+      webglRef.current = new WebGLContextManager(overlayRef.current);
+    }
+
+    rendererRef.current = new RasterRenderer(mapRef.current, overlayRef.current, manifestRef.current);
+
+
+    // rendererRef.current =
+    //   rendererFactory.create(
+    //     renderMode,
+    //     context
+    //   );
+    // rendererRef.current = createRenderer(
+    //   renderMode,
+    //   mapRef.current,
+    //   overlayRef.current,
+    //   manifestRef.current,
+    //   rendererConfig
+    // );
+
+    // const renderer = rendererRef.current;
+    const redraw = () => {
+      rendererRef.current?.draw();
+    };
+
+    //move this  to another effect (map, manifest)
+    const bbox = manifestRef.current.bbox;
+    mapRef.current.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]],], { padding: 20, duration: 0, });
+    const padLon = (bbox[2] - bbox[0]) * 0;
+    const padLat = (bbox[3] - bbox[1]) * 0;
+    mapRef.current.setMaxBounds([[bbox[0] - padLon, bbox[1] - padLat,], [bbox[2] + padLon, bbox[3] + padLat,],]);
+
+
+    mapRef.current.on("move", redraw);
+    mapRef.current.on("zoom", redraw);
+    mapRef.current.on("resize", redraw);
+    mapRef.current.on("moveend", redraw);
+    // mapRef.current.on("move", () => { renderer.draw(); });
+    // mapRef.current.on("zoom", () => { renderer.draw(); });
+    // mapRef.current.on("resize", () => { renderer.draw(); });
+    // mapRef.current.on("moveend", () => { renderer.draw(); });
+
+    setRendererReady(true);
+
+    return () => {
+
+      mapRef.current.off("move", redraw);
+
+      mapRef.current.off("zoom", redraw);
+
+      mapRef.current.off("resize", redraw);
+
+      mapRef.current.off("moveend", redraw);
+
+    };
 
   }, [
-    datasetId,
-    variable,
-    frame,
-    rendererReady,
-  ]);
-  const renderMode = useRenderMode();
-  const rendererConfig =
-    useAtmosStore(
-      s => s.rendererConfig
-    );
-  useEffect(() => {
+    mapLoaded,
+    manifestLoaded,
+    renderMode,
+    rendererConfig
 
+  ]);
+   */
+  useEffect(() => {
+/*
+Runs when the dataset (manifest) changes.
+
+Responsibility:
+Fit map to dataset extent
+Set navigation bounds
+*/
     if (
       !mapLoaded ||
       !manifestLoaded
@@ -136,42 +194,18 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
     if (
       !mapRef.current ||
-      !overlayRef.current ||
       !manifestRef.current
     ) {
       return;
     }
-    // rendererRef.current =
-    //   new RasterRenderer(
-    //     mapRef.current,
-    //     overlayRef.current,
-    //     manifestRef.current
-    //   );
 
-    
-
-    rendererRef.current = createRenderer(
-
-      renderMode,
-
-      mapRef.current,
-
-      overlayRef.current,
-
-      manifestRef.current,
-
-      rendererConfig
-
-
-    );
-
-    const renderer =
-      rendererRef.current;
+    const map =
+      mapRef.current;
 
     const bbox =
       manifestRef.current.bbox;
 
-    mapRef.current.fitBounds(
+    map.fitBounds(
       [
         [bbox[0], bbox[1]],
         [bbox[2], bbox[3]],
@@ -188,7 +222,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     const padLat =
       (bbox[3] - bbox[1]) * 0;
 
-    mapRef.current.setMaxBounds([
+    map.setMaxBounds([
       [
         bbox[0] - padLon,
         bbox[1] - padLat,
@@ -199,32 +233,200 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
       ],
     ]);
 
-    mapRef.current.on("move", () => {
-      renderer.draw();
-    });
-
-    mapRef.current.on("zoom", () => {
-      renderer.draw();
-    });
-
-    mapRef.current.on("resize", () => {
-      renderer.draw();
-    });
-
-    mapRef.current.on("moveend", () => {
-      renderer.draw();
-    });
-
-    setRendererReady(true);
-
   }, [
     mapLoaded,
     manifestLoaded,
+    resolvedVariable,
+  ]);
+
+  useEffect(() => {
+/**
+Runs once after the map exists.
+
+Responsibility:
+
+Register draw listeners
+Remove listeners on cleanup
+ */
+    if (!mapLoaded) {
+      return;
+    }
+
+    const map =
+      mapRef.current;
+
+    if (!map) {
+      return;
+    }
+
+    const redraw = () => {
+
+      rendererRef.current?.draw();
+
+    };
+
+    map.on("move", redraw);
+
+    map.on("zoom", redraw);
+
+    map.on("resize", redraw);
+
+    map.on("moveend", redraw);
+
+    return () => {
+
+      map.off("move", redraw);
+
+      map.off("zoom", redraw);
+
+      map.off("resize", redraw);
+
+      map.off("moveend", redraw);
+
+    };
+
+  }, [
+    mapLoaded,
+  ]);
+
+
+  useEffect(() => {
+/**
+*  Runs whenever the rendering pipeline changes.
+*  
+*  Responsibilities:
+*  
+*  Create WebGL context (if needed)
+*  Dispose previous renderer
+*  Create new renderer
+ */
+    if (
+      !mapLoaded ||
+      !manifestLoaded
+    ) {
+      return;
+    }
+
+    if (
+      !mapRef.current ||
+      !overlayRef.current ||
+      !manifestRef.current
+    ) {
+      return;
+    }
+
+    if (
+      renderBackend === "webgl" &&
+      !webglRef.current
+    ) {
+
+      webglRef.current =
+        new WebGLContextManager(
+          overlayRef.current
+        );
+
+    }
+
+    rendererRef.current?.dispose?.();
+
+    const context: RenderContext = {
+      map: mapRef.current,
+      canvas: overlayRef.current,
+      manifest: manifestRef.current,
+      config: rendererConfig,
+      backend: renderBackend,
+      gl:
+        renderBackend === "webgl"
+          ? webglRef.current?.getContext()
+          : undefined,
+    };
+
+    rendererRef.current =
+      rendererFactory.create(
+        renderMode,
+        context
+      );
+
+
+    return () => {
+
+      rendererRef.current?.dispose?.();
+
+      rendererRef.current = null;
+
+    };
+
+  }, [
+
+    mapLoaded,
+
+    manifestLoaded,
+
     renderMode,
-    rendererConfig
+
+    renderBackend,
+
+    rendererConfig,
+
+    resolvedVariable,
 
   ]);
 
+  useEffect(() => {
+
+
+    if (!rendererRef.current) {
+      return;
+    }
+
+    if (!datasetId) {
+      return;
+    }
+    const currentDatasetId = datasetId;
+
+
+    let cancelled = false;
+
+    async function update() {
+
+      const rasterFrame =
+        await getFrame({
+
+          datasetId:currentDatasetId,
+
+          variable:
+            resolvedVariable,
+
+          frame,
+
+        });
+
+      if (cancelled) {
+        return;
+      }
+
+      rendererRef.current?.renderFrame(
+        rasterFrame
+      );
+
+    }
+
+    update();
+
+    return () => {
+
+      cancelled = true;
+
+    };
+
+  }, [
+
+    datasetId,
+
+    resolvedVariable,
+
+    frame,
+  ]);
   // Mount map once
   useEffect(() => {
     if (!ref.current || mapRef.current) return;
@@ -300,7 +502,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
         }
       );
 
-      
+
 
       map.addSource("basins", { type: "geojson", data: basinFeatureCollection as never });
 

@@ -1,50 +1,73 @@
-// frontend-react/src/rendering/RendererFactory.ts
+import type { Renderer } from "./Renderer";
 
-import maplibregl from "maplibre-gl";
+import type { RenderContext } from "./RenderContext";
 
-import { DatasetManifest } from "@/core/datasets/datasetTypes";
-import { RenderMode } from "@/core/state/types";
+import type { RenderMode } from "@/core/state/types";
 
-import { Renderer } from "./Renderer";
 import { RasterRenderer } from "./raster/RasterRenderer";
 import { ContourRenderer } from "./contour/ContourRenderer";
-import { RendererConfig } from "./RendererConfig";
-export function createRenderer(
 
-    mode: RenderMode,
+import { webGLRendererFactory } from "./WebGLRendererFactory";
 
-    map: maplibregl.Map,
+export class RendererFactory {
 
-    canvas: HTMLCanvasElement,
+    create(
 
-    manifest: DatasetManifest,
+        mode: RenderMode,
 
-    config: RendererConfig
+        context: RenderContext
 
-): Renderer {
+    ): Renderer {
 
-    switch (mode) {
+        switch (mode) {
 
-        case "raster":
+            case "raster":
 
-            return new RasterRenderer(
-                map,
-                canvas,
-                manifest
-            );
+                if (
+                    context.backend === "webgl"
+                ) {
 
-        case "contour":
+                    return webGLRendererFactory.create(
+                        context
+                    );
 
-            return new ContourRenderer(
-                map,
-                canvas,
-                manifest,
-                config
-            );
+                }
 
-        default:
+                return new RasterRenderer(
 
-            throw new Error("Unknown renderer");
+                    context.map,
+
+                    context.canvas,
+
+                    context.manifest
+
+                );
+
+            case "contour":
+
+                return new ContourRenderer(
+
+                    context.map,
+
+                    context.canvas,
+
+                    context.manifest,
+
+                    context.config
+
+                );
+
+            default:
+
+                throw new Error(
+                    `Unsupported renderer '${mode}'.`
+                );
+
+        }
+
     }
 
 }
+
+export const rendererFactory =
+    new RendererFactory();

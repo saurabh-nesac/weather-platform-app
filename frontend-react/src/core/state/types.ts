@@ -1,6 +1,7 @@
 // frontend-react/src/core/state/types.ts
 import { RendererConfig } from "@/rendering/RendererConfig";
 import { BasemapType } from "../../maps/basemaps";
+import { RenderBackend } from "@/rendering/RenderBackend";
 
 export type Point = {
     lat: number;
@@ -45,9 +46,11 @@ export interface AtmosState {
 
     renderMode: RenderMode;
 
-    playing: boolean;
+    renderBackend: RenderBackend;
 
     rendererConfig: RendererConfig;
+
+    playing: boolean;
 
 }
 

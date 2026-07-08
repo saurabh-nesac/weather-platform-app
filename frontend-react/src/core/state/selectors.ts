@@ -44,7 +44,17 @@ export const useMaxFrame = () =>
         );
     }
     );
+export const useRenderBackend =
+    () =>
+        useAtmosStore(
+            s => s.renderBackend
+        );
 
+export const useSetRenderBackend =
+    () =>
+        useAtmosStore(
+            s => s.setRenderBackend
+        );
 export const useTimestamps = () =>
     useDatasetStore((s) => {
 

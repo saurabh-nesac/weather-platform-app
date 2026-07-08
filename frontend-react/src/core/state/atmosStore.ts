@@ -9,8 +9,14 @@ import {
 } from "./types";
 import { BasemapType } from "../../maps/basemaps";
 import { DEFAULT_RENDERER_CONFIG, RendererConfig } from "@/rendering/RendererConfig";
+import { RenderBackend } from "@/rendering/RenderBackend";
 
 interface AtmosActions {
+
+    setRenderBackend: (
+        backend: RenderBackend
+    ) => void;
+
     
     updateContourConfig(
 
@@ -78,9 +84,11 @@ const initialState: AtmosState = {
 
     renderMode: "raster",
 
+    renderBackend: "canvas",
+
+    rendererConfig: DEFAULT_RENDERER_CONFIG,
+
     playing: false,
-    rendererConfig:
-        DEFAULT_RENDERER_CONFIG,
 
 };
 
@@ -107,7 +115,12 @@ export const useAtmosStore =
                     },
 
                 })),
-
+        setRenderBackend: (
+            renderBackend
+        ) =>
+            set({
+                renderBackend,
+            }),
         setPressureLevel: (
             pressureLevel
         ) =>

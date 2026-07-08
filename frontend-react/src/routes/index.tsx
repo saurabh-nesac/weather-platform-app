@@ -16,7 +16,7 @@ import type { BasinId } from "@/components/atmos/basins";
 import { TimelineControl } from "../components/controls/TimelineControl";
 import { bootstrapDatasets } from "../core/bootstrap/bootstrapDatasets";
 import { useDatasetStore } from "../core/state/datasetStore";
-import { useBasemap, useContourColorScheme, useContourInterval, useContourLineWidth, usePressureLevel, useSetBasemap, useSetPressureLevel, useShowContourLabels, useUpdateContourConfig, useContourThreshold,useVariable } from "../core/state/selectors";
+import { useBasemap, useContourColorScheme, useContourInterval, useContourLineWidth, usePressureLevel, useSetBasemap, useSetPressureLevel, useShowContourLabels, useUpdateContourConfig, useContourThreshold, useVariable } from "../core/state/selectors";
 import { useAtmosStore } from "../core/state/atmosStore";
 import {
   useSetPlaying,
@@ -24,6 +24,7 @@ import {
 } from "../core/state/selectors";
 import { resolveVariable } from "@/core/datasets/resolveVariable";
 import { PressureLevel } from "@/core/state/types";
+import { RenderBackend } from "@/rendering/RenderBackend";
 
 
 export const Route = createFileRoute("/")({
@@ -68,7 +69,15 @@ function AtmosphericEngine() {
 
   const contourThreshold =
     useContourThreshold();
+  const backend =
+    useAtmosStore(
+      s => s.renderBackend
+    );
 
+  const setBackend =
+    useAtmosStore(
+      s => s.setRenderBackend
+    );
   const setPlaying = useSetPlaying();
   const setFrame = useSetFrame();
 
@@ -262,6 +271,33 @@ function AtmosphericEngine() {
                 </option>
 
               </select>
+              <Field label="Rendering Backend">
+
+                <select
+
+                  value={backend}
+
+                  disabled={renderMode === "contour"}
+
+                  onChange={(e) =>
+                    setBackend(
+                      e.target.value as RenderBackend
+                    )
+                  }
+
+                >
+
+                  <option value="canvas">
+                    Canvas
+                  </option>
+
+                  <option value="webgl">
+                    WebGL
+                  </option>
+
+                </select>
+
+              </Field>
               {renderMode === "contour" && (
                 <section className="space-y-3">
 

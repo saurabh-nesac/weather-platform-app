@@ -9,4 +9,6 @@ export interface Renderer {
 
     draw(): void;
 
+    dispose?(): void;
+
 }
