@@ -8,24 +8,54 @@ export class WebGLContextManager {
         private readonly canvas: HTMLCanvasElement
     ) {
 
-        const gl =
-            canvas.getContext(
-                "webgl2",
-                {
-                    alpha: true,
-                    antialias: true,
-                    depth: false,
-                    stencil: false,
-                    premultipliedAlpha: false,
-                    preserveDrawingBuffer: false,
-                }
-            );
+        console.log("Canvas", canvas);
+        console.log(
+            "Canvas size:",
+            canvas.clientWidth,
+            canvas.clientHeight
+        );
+        console.log(canvas);
+
+        console.log(canvas instanceof HTMLCanvasElement);
+
+        console.log(canvas.isConnected);
+
+        console.log(canvas.ownerDocument === document);
+
+        console.log(canvas.parentElement);
+
+        console.log(canvas.width, canvas.height);
+
+        console.log(canvas.clientWidth, canvas.clientHeight);
+        console.log(
+            document.querySelectorAll("canvas")[1]
+        );
+        const gl = canvas.getContext("webgl2", 
+        //     {
+        //     alpha: true,
+        //     antialias: true,
+        //     depth: false,
+        //     stencil: false,
+        //     premultipliedAlpha: false,
+        //     preserveDrawingBuffer: false,
+        // }
+    );
+
+        console.log("WebGL2 context:", gl);
 
         if (!gl) {
 
-            throw new Error(
-                "WebGL2 is not supported."
+            console.log(
+                "webgl:",
+                canvas.getContext("webgl")
             );
+
+            console.log(
+                "experimental-webgl:",
+                canvas.getContext("experimental-webgl")
+            );
+
+            throw new Error("WebGL2 is not supported.");
 
         }
 

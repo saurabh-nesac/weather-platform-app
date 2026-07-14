@@ -1,4 +1,5 @@
 // frontend-react/src/components/atmos/MapView.tsx
+import { VisualizationFactory, visualizationFactory } from "@/rendering/visualization/VisualizationFactory";
 import { useRenderBackend, useRenderMode } from "@/core/state/selectors";
 import maplibregl from "maplibre-gl";
 import { BASINS, basinFeatureCollection, type BasinId } from "./basins";
@@ -11,16 +12,17 @@ import { useBasemap, useFrame, usePressureLevel, useSelectedDatasetId, useSelect
 import {
   getFrame
 } from "../../core/datasets/frameManager";
-import { RasterRenderer } from "../../rendering/raster/RasterRenderer";
 import type { Renderer } from "@/rendering/Renderer";
 import {
   useSetSelectedPoint,
 } from "../../core/state/selectors";
 import { resolveVariable } from "@/core/datasets/resolveVariable";
-import { rendererFactory } from "@/rendering/RendererFactory";
 import { useAtmosStore } from "@/core/state/atmosStore";
 import { WebGLContextManager } from "@/rendering/webgl/WebGLContextManager";
-import { RenderContext } from "@/rendering/RenderContext";
+import { RenderContext, RenderContextSurface } from "@/rendering/RenderContext";
+import { RenderSurface } from "@/rendering/surface/RenderSurface";
+import { surfaceManager, SurfaceManager } from "@/rendering/surface/SurfaceManager";
+import type { Visualization } from "@/rendering/visualization/Visualization";
 
 
 interface Props {
@@ -39,7 +41,8 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   const setSelectedPoint = useSetSelectedPoint();
   const markerRef = useRef<maplibregl.Marker | null>(null);
 
-  const webglRef = useRef<WebGLContextManager | null>(null);
+  const surfaceRef = useRef<RenderSurface | null>(null);
+  // const surfaceRef = useRef<SurfaceManager | null>(null);
 
   const basemap = useBasemap();
   const [manifestLoaded, setManifestLoaded] = useState(false);
@@ -55,6 +58,8 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
   const rendererRef = useRef<Renderer | null>(null);
   const renderBackend = useRenderBackend();
+
+  const visualizationRef = useRef<Visualization | null>(null);
 
 
   const datasetId = useSelectedDatasetId();
@@ -95,96 +100,96 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   // ) {
   //   return;
   // }
-/*
-
+  /*
+  
+    useEffect(() => {
+  
+      if (
+        !mapLoaded || !manifestLoaded
+      ) {
+        return;
+      }
+  
+      if (
+        !mapRef.current || !overlayRef.current || !manifestRef.current
+      ) {
+        return;
+      }
+  
+      if (
+        renderBackend === "webgl" && !webglRef.current
+      ) {
+        webglRef.current = new WebGLContextManager(overlayRef.current);
+      }
+  
+      rendererRef.current = new RasterRenderer(mapRef.current, overlayRef.current, manifestRef.current);
+  
+  
+      // rendererRef.current =
+      //   rendererFactory.create(
+      //     renderMode,
+      //     context
+      //   );
+      // rendererRef.current = createRenderer(
+      //   renderMode,
+      //   mapRef.current,
+      //   overlayRef.current,
+      //   manifestRef.current,
+      //   rendererConfig
+      // );
+  
+      // const renderer = rendererRef.current;
+      const redraw = () => {
+        rendererRef.current?.draw();
+      };
+  
+      //move this  to another effect (map, manifest)
+      const bbox = manifestRef.current.bbox;
+      mapRef.current.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]],], { padding: 20, duration: 0, });
+      const padLon = (bbox[2] - bbox[0]) * 0;
+      const padLat = (bbox[3] - bbox[1]) * 0;
+      mapRef.current.setMaxBounds([[bbox[0] - padLon, bbox[1] - padLat,], [bbox[2] + padLon, bbox[3] + padLat,],]);
+  
+  
+      mapRef.current.on("move", redraw);
+      mapRef.current.on("zoom", redraw);
+      mapRef.current.on("resize", redraw);
+      mapRef.current.on("moveend", redraw);
+      // mapRef.current.on("move", () => { renderer.draw(); });
+      // mapRef.current.on("zoom", () => { renderer.draw(); });
+      // mapRef.current.on("resize", () => { renderer.draw(); });
+      // mapRef.current.on("moveend", () => { renderer.draw(); });
+  
+      setRendererReady(true);
+  
+      return () => {
+  
+        mapRef.current.off("move", redraw);
+  
+        mapRef.current.off("zoom", redraw);
+  
+        mapRef.current.off("resize", redraw);
+  
+        mapRef.current.off("moveend", redraw);
+  
+      };
+  
+    }, [
+      mapLoaded,
+      manifestLoaded,
+      renderMode,
+      rendererConfig
+  
+    ]);
+     */
   useEffect(() => {
-
-    if (
-      !mapLoaded || !manifestLoaded
-    ) {
-      return;
-    }
-
-    if (
-      !mapRef.current || !overlayRef.current || !manifestRef.current
-    ) {
-      return;
-    }
-
-    if (
-      renderBackend === "webgl" && !webglRef.current
-    ) {
-      webglRef.current = new WebGLContextManager(overlayRef.current);
-    }
-
-    rendererRef.current = new RasterRenderer(mapRef.current, overlayRef.current, manifestRef.current);
-
-
-    // rendererRef.current =
-    //   rendererFactory.create(
-    //     renderMode,
-    //     context
-    //   );
-    // rendererRef.current = createRenderer(
-    //   renderMode,
-    //   mapRef.current,
-    //   overlayRef.current,
-    //   manifestRef.current,
-    //   rendererConfig
-    // );
-
-    // const renderer = rendererRef.current;
-    const redraw = () => {
-      rendererRef.current?.draw();
-    };
-
-    //move this  to another effect (map, manifest)
-    const bbox = manifestRef.current.bbox;
-    mapRef.current.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]],], { padding: 20, duration: 0, });
-    const padLon = (bbox[2] - bbox[0]) * 0;
-    const padLat = (bbox[3] - bbox[1]) * 0;
-    mapRef.current.setMaxBounds([[bbox[0] - padLon, bbox[1] - padLat,], [bbox[2] + padLon, bbox[3] + padLat,],]);
-
-
-    mapRef.current.on("move", redraw);
-    mapRef.current.on("zoom", redraw);
-    mapRef.current.on("resize", redraw);
-    mapRef.current.on("moveend", redraw);
-    // mapRef.current.on("move", () => { renderer.draw(); });
-    // mapRef.current.on("zoom", () => { renderer.draw(); });
-    // mapRef.current.on("resize", () => { renderer.draw(); });
-    // mapRef.current.on("moveend", () => { renderer.draw(); });
-
-    setRendererReady(true);
-
-    return () => {
-
-      mapRef.current.off("move", redraw);
-
-      mapRef.current.off("zoom", redraw);
-
-      mapRef.current.off("resize", redraw);
-
-      mapRef.current.off("moveend", redraw);
-
-    };
-
-  }, [
-    mapLoaded,
-    manifestLoaded,
-    renderMode,
-    rendererConfig
-
-  ]);
-   */
-  useEffect(() => {
-/*
-Runs when the dataset (manifest) changes.
-
-Responsibility:
-Fit map to dataset extent
-Set navigation bounds
-*/
+    /*
+    Runs when the dataset (manifest) changes.
+    
+    Responsibility:
+    Fit map to dataset extent
+    Set navigation bounds
+    */
     if (
       !mapLoaded ||
       !manifestLoaded
@@ -240,14 +245,14 @@ Set navigation bounds
   ]);
 
   useEffect(() => {
-/**
-Runs once after the map exists.
-
-Responsibility:
-
-Register draw listeners
-Remove listeners on cleanup
- */
+    /**
+    Runs once after the map exists.
+    
+    Responsibility:
+    
+    Register draw listeners
+    Remove listeners on cleanup
+     */
     if (!mapLoaded) {
       return;
     }
@@ -261,7 +266,7 @@ Remove listeners on cleanup
 
     const redraw = () => {
 
-      rendererRef.current?.draw();
+      visualizationRef.current?.draw();
 
     };
 
@@ -285,74 +290,49 @@ Remove listeners on cleanup
 
     };
 
-  }, [
-    mapLoaded,
-  ]);
-
+  }, [mapLoaded,]);
 
   useEffect(() => {
-/**
-*  Runs whenever the rendering pipeline changes.
-*  
-*  Responsibilities:
-*  
-*  Create WebGL context (if needed)
-*  Dispose previous renderer
-*  Create new renderer
- */
+
     if (
       !mapLoaded ||
-      !manifestLoaded
+      !manifestLoaded ||
+      !overlayRef.current
     ) {
       return;
     }
 
-    if (
-      !mapRef.current ||
-      !overlayRef.current ||
-      !manifestRef.current
-    ) {
-      return;
-    }
+    //
+    // Create (or replace) the rendering surface.
+    //
+    surfaceManager.create(
 
-    if (
-      renderBackend === "webgl" &&
-      !webglRef.current
-    ) {
+      renderBackend,
+      overlayRef.current
 
-      webglRef.current =
-        new WebGLContextManager(
-          overlayRef.current
-        );
+    );
 
-    }
+    //
+    // Create visualization.
+    //
+    visualizationRef.current?.dispose();
 
-    rendererRef.current?.dispose?.();
+    visualizationRef.current =
+      VisualizationFactory.create(
 
-    const context: RenderContext = {
-      map: mapRef.current,
-      canvas: overlayRef.current,
-      manifest: manifestRef.current,
-      config: rendererConfig,
-      backend: renderBackend,
-      gl:
-        renderBackend === "webgl"
-          ? webglRef.current?.getContext()
-          : undefined,
-    };
-
-    rendererRef.current =
-      rendererFactory.create(
         renderMode,
-        context
-      );
 
+        surfaceManager.getSurface()
+
+      );
 
     return () => {
 
-      rendererRef.current?.dispose?.();
+      visualizationRef.current?.dispose();
 
-      rendererRef.current = null;
+      visualizationRef.current = null;
+
+      surfaceManager.dispose();
 
     };
 
@@ -362,13 +342,9 @@ Remove listeners on cleanup
 
     manifestLoaded,
 
-    renderMode,
-
     renderBackend,
 
-    rendererConfig,
-
-    resolvedVariable,
+    renderMode,
 
   ]);
 
@@ -392,7 +368,7 @@ Remove listeners on cleanup
       const rasterFrame =
         await getFrame({
 
-          datasetId:currentDatasetId,
+          datasetId: currentDatasetId,
 
           variable:
             resolvedVariable,
@@ -405,7 +381,7 @@ Remove listeners on cleanup
         return;
       }
 
-      rendererRef.current?.renderFrame(
+      visualizationRef.current?.renderFrame(
         rasterFrame
       );
 

@@ -10,6 +10,7 @@ import type {
     RendererConfig,
 } from "./RendererConfig";
 import { RenderBackend } from "./RenderBackend";
+import { RenderSurface } from "./surface/RenderSurface";
 
 /**
  * Immutable rendering environment shared by all renderers.
@@ -18,7 +19,6 @@ import { RenderBackend } from "./RenderBackend";
  * are intentionally NOT stored here.
  */
 export interface RenderContext {
-
     /**
      * MapLibre instance used for projection.
      */
@@ -49,3 +49,7 @@ export interface RenderContext {
 
 }
 
+export interface RenderContextSurface{
+readonly map : maplibregl.Map;
+readonly surface: RenderSurface;
+}
