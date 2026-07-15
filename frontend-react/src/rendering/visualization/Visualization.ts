@@ -1,19 +1,30 @@
 // frontend-react/src/rendering/visualization/Visualization.ts
-import { RasterFrame } from "@/core/datasets/datasetTypes";
+import { DatasetManifest, RasterFrame } from "@/core/datasets/datasetTypes";
 import { RenderSurface } from "../surface/RenderSurface";
 
 export interface Visualization {
-
+    /**
+     * Rendering algorithm and GPU Resource Ownership
+     */
     readonly id: string;
 
+
+    initialize(
+        gl: WebGL2RenderingContext,
+        manifest: DatasetManifest
+
+    ): void;
+
     renderFrame(
-        frame: RasterFrame
-    ): void | Promise<void>;
+        frame: RasterFrame,
+        manifest: DatasetManifest
+    ): void;
 
     draw(): void;
 
     resize(): void;
 
     dispose(): void;
+
 
 }

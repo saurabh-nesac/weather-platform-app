@@ -21,7 +21,7 @@ export class VisualizationFactory {
             case "raster":
 
                 return new RasterVisualization(
-                    surface
+                    surface, 
                 );
 
             case "contour":

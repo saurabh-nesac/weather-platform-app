@@ -23,6 +23,7 @@ import { RenderContext, RenderContextSurface } from "@/rendering/RenderContext";
 import { RenderSurface } from "@/rendering/surface/RenderSurface";
 import { surfaceManager, SurfaceManager } from "@/rendering/surface/SurfaceManager";
 import type { Visualization } from "@/rendering/visualization/Visualization";
+import { AtmosphericLayer } from "@/rendering/layers/AtmosphericLayer";
 
 
 interface Props {
@@ -382,7 +383,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
       }
 
       visualizationRef.current?.renderFrame(
-        rasterFrame
+        rasterFrame, manifestRef.current
       );
 
     }
@@ -438,7 +439,9 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     mapRef.current = map;
 
     map.on("load", () => {
-
+      map.addLayer(
+        new AtmosphericLayer()
+      );
       console.log(
         "map div",
         ref.current?.clientWidth,

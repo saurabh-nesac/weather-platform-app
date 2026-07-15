@@ -10,6 +10,7 @@ import type {
 } from "../RendererConfig";
 
 /**
+ * GLSL code and shader-specific uniforms.
  * A ShaderModule describes how a scalar raster
  * should be rendered.
  *
