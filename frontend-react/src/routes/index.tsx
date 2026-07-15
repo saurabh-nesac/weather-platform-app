@@ -52,64 +52,26 @@ function AtmosphericEngine() {
   // const contourInterval =
   //   useContourInterval();
 
-  const contourInterval =
-    useContourInterval();
-
-  const contourLineWidth =
-    useContourLineWidth();
-
-  const contourColorScheme =
-    useContourColorScheme();
-
-  const showContourLabels =
-    useShowContourLabels();
-
-  const updateContourConfig =
-    useUpdateContourConfig();
-
-  const contourThreshold =
-    useContourThreshold();
-  const backend =
-    useAtmosStore(
-      s => s.renderBackend
-    );
-
-  const setBackend =
-    useAtmosStore(
-      s => s.setRenderBackend
-    );
+  const contourInterval = useContourInterval();
+  const contourLineWidth = useContourLineWidth();
+  const contourColorScheme = useContourColorScheme();
+  const showContourLabels = useShowContourLabels();
+  const updateContourConfig = useUpdateContourConfig();
+  const contourThreshold = useContourThreshold();
+  const backend = useAtmosStore(s => s.renderBackend);
+  const setBackend = useAtmosStore(s => s.setRenderBackend);
   const setPlaying = useSetPlaying();
   const setFrame = useSetFrame();
-
   const basemap = useBasemap();
-
   const setBasemap = useSetBasemap();
-  const baseVariable =
-    useVariable();
+  const baseVariable = useVariable();
+  const pressureLevel = usePressureLevel();
+  const setPressureLevel = useSetPressureLevel();
+  const variable = resolveVariable(baseVariable, pressureLevel);
 
-  const pressureLevel =
-    usePressureLevel();
-  const setPressureLevel =
-    useSetPressureLevel();
-
-  const variable =
-    resolveVariable(
-      baseVariable,
-      pressureLevel
-    );
-
-  const setVariable = useAtmosStore(
-    s => s.setVariable
-  );
-  const renderMode =
-    useAtmosStore(
-      s => s.renderMode
-    );
-
-  const setRenderMode =
-    useAtmosStore(
-      s => s.setRenderMode
-    );
+  const setVariable = useAtmosStore(s => s.setVariable);
+  const renderMode = useAtmosStore(s => s.renderMode);
+  const setRenderMode = useAtmosStore(s => s.setRenderMode);
 
   return (
     <div className="flex h-screen flex-col bg-bg text-fg">
@@ -147,256 +109,91 @@ function AtmosphericEngine() {
         <aside className="flex flex-col gap-3 overflow-y-auto scroll-thin">
           <section className="panel p-3">
             <SectionTitle icon={<Settings2 className="h-3.5 w-3.5" />}>CONTROLS</SectionTitle>
-            <Field label="Variable"
-            >
-
+            <Field label="Variable">
               <select
                 value={baseVariable}
-                onChange={(e) =>
-                  setVariable(
-                    e.target.value
-                  )
-                }
-
+                onChange={(e) => setVariable(e.target.value)}
               >
-
-                <option value="TEMP">
-                  Temperature
-                </option>
-
-                <option value="RAIN">
-                  Rainfall
-                </option>
-
-                <option value="WIND">
-                  Wind Speed
-                </option>
-
+                <option value="TEMP">Temperature</option>
+                <option value="RAIN">Rainfall</option>
+                <option value="WIND">Wind Speed</option>
               </select>
-
             </Field>
             <Field label="Pressure Level">
-
               <select
                 value={pressureLevel}
                 onChange={(e) => {
-
-                  const value =
-                    e.target.value;
-
-                  if (
-                    value === "surface"
-                  ) {
-
-                    setPressureLevel(
-                      "surface"
-                    );
-
-                  } else {
-
-                    setPressureLevel(
-                      Number(value) as PressureLevel
-                    );
-
-                  }
+                  const value = e.target.value;
+                  setPressureLevel(value === "surface" ? "surface" : (Number(value) as PressureLevel));
                 }}
                 className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
               >
-
-                <option value="surface">
-                  Surface
-                </option>
-
-                <option value="1000">
-                  1000 hPa
-                </option>
-
-                <option value="925">
-                  925 hPa
-                </option>
-
-                <option value="850">
-                  850 hPa
-                </option>
-
-                <option value="700">
-                  700 hPa
-                </option>
-
-                <option value="500">
-                  500 hPa
-                </option>
-
-                <option value="300">
-                  300 hPa
-                </option>
-
-                <option value="250">
-                  250 hPa
-                </option>
-
-                <option value="200">
-                  200 hPa
-                </option>
-
+                <option value="surface">Surface</option>
+                <option value="1000">1000 hPa</option>
+                <option value="925">925 hPa</option>
+                <option value="850">850 hPa</option>
+                <option value="700">700 hPa</option>
+                <option value="500">500 hPa</option>
+                <option value="300">300 hPa</option>
+                <option value="250">250 hPa</option>
+                <option value="200">200 hPa</option>
               </select>
-
             </Field>
 
             <Field label="Render Mode">
-
               <select
-
                 value={renderMode}
-
-                onChange={(e) =>
-
-                  setRenderMode(
-                    e.target.value as
-                    "raster" | "contour"
-                  )
-
-                }
-
+                onChange={(e) => setRenderMode(e.target.value as "raster" | "contour")}
                 className="w-full rounded-md border border-border bg-panel-2 px-2 py-1 text-sm"
-
               >
-
-                <option value="raster">
-                  Raster
-                </option>
-
-                <option value="contour">
-                  Contour
-                </option>
-
+                <option value="raster">Raster</option>
+                <option value="contour">Contour</option>
               </select>
-              <Field label="Rendering Backend">
-
-                <select
-
-                  value={backend}
-
-                  disabled={renderMode === "contour"}
-
-                  onChange={(e) =>
-                    setBackend(
-                      e.target.value as RenderBackend
-                    )
-                  }
-
-                >
-
-                  <option value="canvas">
-                    Canvas
-                  </option>
-
-                  <option value="webgl">
-                    WebGL
-                  </option>
-
-                </select>
-
-              </Field>
               {renderMode === "contour" && (
                 <section className="space-y-3">
-
-                  <h3 className="text-sm font-semibold">
-                    Contour Settings
-                  </h3>
-
+                  <h3 className="text-sm font-semibold">Contour Settings</h3>
                   <Field label="Contour Interval">
-
                     <select
                       value={contourInterval}
-                      onChange={(e) =>
-                        updateContourConfig({
-                          interval: Number(e.target.value),
-                        })
-                      }
+                      onChange={(e) => updateContourConfig({ interval: Number(e.target.value) })}
                       className="w-full rounded border border-border bg-panel-2 px-2 py-1"
                     >
-
                       <option value={1}>1</option>
                       <option value={2}>2</option>
                       <option value={5}>5</option>
                       <option value={10}>10</option>
-
                     </select>
-
                   </Field>
-
                   <Field label="Line Width">
-
                     <select
                       value={contourLineWidth}
-                      onChange={(e) =>
-                        updateContourConfig({
-                          lineWidth: Number(e.target.value),
-                        })
-                      }
+                      onChange={(e) => updateContourConfig({ lineWidth: Number(e.target.value) })}
                       className="w-full rounded border border-border bg-panel-2 px-2 py-1"
                     >
-
                       <option value={1}>1 px</option>
                       <option value={1.5}>1.5 px</option>
                       <option value={2}>2 px</option>
                       <option value={3}>3 px</option>
-
                     </select>
-
                   </Field>
-
                   <Field label="Color Scheme">
-
                     <select
                       value={contourColorScheme}
-                      onChange={(e) =>
-                        updateContourConfig({
-                          colorScheme:
-                            e.target.value as
-                            | "temperature"
-                            | "grayscale"
-                            | "rainbow"
-                            | "single",
-                        })
-                      }
+                      onChange={(e) => updateContourConfig({ colorScheme: e.target.value as "temperature" | "grayscale" | "rainbow" | "single" })}
                       className="w-full rounded border border-border bg-panel-2 px-2 py-1"
                     >
-
-                      <option value="temperature">
-                        Temperature
-                      </option>
-
-                      <option value="grayscale">
-                        Grayscale
-                      </option>
-
-                      <option value="rainbow">
-                        Rainbow
-                      </option>
-
-                      <option value="single">
-                        Single Color
-                      </option>
-
+                      <option value="temperature">Temperature</option>
+                      <option value="grayscale">Grayscale</option>
+                      <option value="rainbow">Rainbow</option>
+                      <option value="single">Single Color</option>
                     </select>
-
                   </Field>
-
                   <Field label="Contour Labels">
-
                     <label className="flex items-center gap-2">
-
                       <input
                         type="checkbox"
                         checked={showContourLabels}
-                        onChange={(e) =>
-                          updateContourConfig({
-                            showLabels:
-                              e.target.checked,
-                          })
-                        }
+                        onChange={(e) => updateContourConfig({ showLabels: e.target.checked })}
                       />
 
                       <span>Show Labels</span>
@@ -408,67 +205,25 @@ function AtmosphericEngine() {
 
             {baseVariable === "RAIN" && (
               <Field label="Minimum Value">
-
                 <div className="flex gap-2">
-
                   <input
-
                     type="range"
-
                     min={0}
-
                     max={20}
-
                     step={0.1}
-
                     value={contourThreshold}
-
-                    onChange={(e) =>
-
-                      updateContourConfig({
-
-                        threshold:
-                          Number(
-                            e.target.value
-                          )
-
-                      })
-
-                    }
-
+                    onChange={(e) => updateContourConfig({ threshold: Number(e.target.value) })}
                     className="flex-1"
-
                   />
-
                   <input
-
                     type="number"
-
                     min={0}
-
                     step={0.1}
-
                     value={contourThreshold}
-
-                    onChange={(e) =>
-
-                      updateContourConfig({
-
-                        threshold:
-                          Number(
-                            e.target.value
-                          )
-
-                      })
-
-                    }
-
+                    onChange={(e) => updateContourConfig({ threshold: Number(e.target.value) })}
                     className="w-20 rounded border border-border bg-panel-2 px-2"
-
                   />
-
                 </div>
-
               </Field>
             )}
 
@@ -506,8 +261,7 @@ function AtmosphericEngine() {
             <Field label="Timeline">
               <TimelineControl />
             </Field>
-
-            <Field label={`Opacity`} rightLabel={`${opacity}%`}>
+            <Field label="Opacity" rightLabel={`${opacity}%`}>
               <input
                 type="range" min={0} max={100} value={opacity}
                 onChange={(e) => setOpacity(+e.target.value)}

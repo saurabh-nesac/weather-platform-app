@@ -8,27 +8,35 @@ import { RasterVisualization } from "./RasterVisualization";
 import { ContourVisualization } from "./ContourVisualization";
 import { StreamlineVisualization } from "./StreamlineVisualization";
 import { VectorVisualization } from "./VectorVisualization";
+import { RenderContext } from "../RenderContext";
 
 export class VisualizationFactory {
 
     static create(
         mode: RenderMode,
-        surface: RenderSurface
+        surface: RenderSurface,
+        context?: RenderContext
     ): Visualization {
+
+        let visualization: Visualization;
 
         switch (mode) {
 
             case "raster":
 
-                return new RasterVisualization(
-                    surface, 
+                visualization = new RasterVisualization(
+                    surface
                 );
+
+                break;
 
             case "contour":
 
-                return new ContourVisualization(
+                visualization = new ContourVisualization(
                     surface
                 );
+
+                break;
 
             default:
 
@@ -38,6 +46,14 @@ export class VisualizationFactory {
 
         }
 
+        if (context) {
+            visualization.setContext(context);
+        }
+
+        return visualization;
+
     }
 
-}export const visualizationFactory = new VisualizationFactory();
+}
+
+export const visualizationFactory = new VisualizationFactory();

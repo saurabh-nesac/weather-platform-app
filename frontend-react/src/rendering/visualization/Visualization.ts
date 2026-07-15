@@ -1,30 +1,22 @@
 // frontend-react/src/rendering/visualization/Visualization.ts
-import { DatasetManifest, RasterFrame } from "@/core/datasets/datasetTypes";
+import { RasterFrame } from "@/core/datasets/datasetTypes";
 import { RenderSurface } from "../surface/RenderSurface";
+import { RenderContext } from "../RenderContext";
 
 export interface Visualization {
-    /**
-     * Rendering algorithm and GPU Resource Ownership
-     */
+
     readonly id: string;
 
-
-    initialize(
-        gl: WebGL2RenderingContext,
-        manifest: DatasetManifest
-
-    ): void;
+    setContext(context: RenderContext): void;
 
     renderFrame(
-        frame: RasterFrame,
-        manifest: DatasetManifest
-    ): void;
+        frame: RasterFrame
+    ): void | Promise<void>;
 
     draw(): void;
 
     resize(): void;
 
     dispose(): void;
-
 
 }

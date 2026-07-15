@@ -23,7 +23,6 @@ import { RenderContext, RenderContextSurface } from "@/rendering/RenderContext";
 import { RenderSurface } from "@/rendering/surface/RenderSurface";
 import { surfaceManager, SurfaceManager } from "@/rendering/surface/SurfaceManager";
 import type { Visualization } from "@/rendering/visualization/Visualization";
-import { AtmosphericLayer } from "@/rendering/layers/AtmosphericLayer";
 
 
 interface Props {
@@ -57,7 +56,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
   const manifestRef = useRef<any>(null);
   // const rendererRef = useRef<RasterRenderer | null>(null);
 
-  const rendererRef = useRef<Renderer | null>(null);
+  // const rendererRef = useRef<Renderer | null>(null);
   const renderBackend = useRenderBackend();
 
   const visualizationRef = useRef<Visualization | null>(null);
@@ -298,7 +297,9 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     if (
       !mapLoaded ||
       !manifestLoaded ||
-      !overlayRef.current
+      !overlayRef.current ||
+      !mapRef.current ||
+      !manifestRef.current
     ) {
       return;
     }
@@ -314,6 +315,17 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     );
 
     //
+    // Create render context with map, manifest, and canvas.
+    //
+    const renderContext: RenderContext = {
+      map: mapRef.current,
+      canvas: overlayRef.current,
+      manifest: manifestRef.current,
+      config: rendererConfig,
+      backend: renderBackend,
+    };
+
+    //
     // Create visualization.
     //
     visualizationRef.current?.dispose();
@@ -323,7 +335,9 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
         renderMode,
 
-        surfaceManager.getSurface()
+        surfaceManager.getSurface(),
+
+        renderContext
 
       );
 
@@ -347,12 +361,14 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
 
     renderMode,
 
+    rendererConfig,
+
   ]);
 
   useEffect(() => {
 
 
-    if (!rendererRef.current) {
+    if (!visualizationRef.current) {
       return;
     }
 
@@ -383,7 +399,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
       }
 
       visualizationRef.current?.renderFrame(
-        rasterFrame, manifestRef.current
+        rasterFrame
       );
 
     }
@@ -439,9 +455,7 @@ export function MapView({ selectedBasin, onSelectBasin, visibleOverlays }: Props
     mapRef.current = map;
 
     map.on("load", () => {
-      map.addLayer(
-        new AtmosphericLayer()
-      );
+
       console.log(
         "map div",
         ref.current?.clientWidth,
